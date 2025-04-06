@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編集ページ</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f0f0f0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container { 
+            width: 500px; 
+            padding: 20px; 
+            background-color: #fff; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+            border-radius: 8px; 
+            text-align: center; 
+            margin-top: 50px; /* 上部に余裕を持たせる */
+        }
+        input, textarea { 
+            margin: 10px 0; 
+            padding: 10px; 
+            width: calc(100% - 22px); 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+        }
+        button { 
+            padding: 10px 20px; 
+            margin: 10px 5px; 
+            border: none; 
+            border-radius: 4px; 
+            background-color: #007bff; 
+            color: white; 
+            cursor: pointer; 
+        }
+        button:hover { 
+            background-color: #0056b3; 
+        }
+        .delete-btn { 
+            background-color: red; 
+        }
+        .delete-btn:hover { 
+            background-color: darkred; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>編集ページ</h2>
+        <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999">
+        <input type="text" id="nameInput" placeholder="名前">
+        <textarea id="memoInput" placeholder="メモ"></textarea>
+        <button onclick="saveEntry()">保存</button>
+        <button onclick="cancel()">キャンセル</button>
+        <button class="delete-btn" onclick="confirmDelete()">削除</button>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", loadEntry);
+
+        function loadEntry() {
+            let params = new URLSearchParams(window.location.search);
+            let index = params.get("index");
+            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+            if (entries[index]) {
+                document.getElementById("numberInput").value = entries[index].number;
+                document.getElementById("nameInput").value = entries[index].name;
+                document.getElementById("memoInput").value = entries[index].memo;
+            }
+        }
+
+        function saveEntry() {
+            let params = new URLSearchParams(window.location.search);
+            let index = params.get("index");
+            let number = document.getElementById("numberInput").value;
+            let name = document.getElementById("nameInput").value;
+            let memo = document.getElementById("memoInput").value;
+            let timestamp = new Date().toLocaleString();
+            if (number.length !== 3 || name.trim() === "") {
+                alert("3桁の番号と名前を入力してください");
+                return;
+            }
+            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+            entries[index] = { number, name, memo, timestamp };
+            localStorage.setItem("entries", JSON.stringify(entries));
+            window.location.href = "admin.html";
+        }
+
+        function cancel() {
+            window.location.href = "admin.html";
+        }
+
+        function confirmDelete() {
+            if (confirm("本当に削除しますか？")) {
+                deleteEntry();
+            }
+        }
+
+        function deleteEntry() {
+            let params = new URLSearchParams(window.location.search);
+            let index = params.get("index");
+            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+            entries.splice(index, 1);
+            localStorage.setItem("entries", JSON.stringify(entries));
+            window.location.href = "admin.html";
+        }
+    </script>
+</body>
+</html>
