@@ -63,51 +63,88 @@
     <script>
         document.addEventListener("DOMContentLoaded", loadEntry);
 
-        function loadEntry() {
+        async function loadEntry() {
             let params = new URLSearchParams(window.location.search);
             let index = params.get("index");
-            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-            if (entries[index]) {
-                document.getElementById("numberInput").value = entries[index].number;
-                document.getElementById("nameInput").value = entries[index].name;
-                document.getElementById("memoInput").value = entries[index].memo;
+
+            try {
+                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`);
+                let entry = await response.json();
+
+                if (entry) {
+                    document.getElementById("numberInput").value = entry.number;
+                    document.getElementById("nameInput").value = entry.name;
+                    document.getElementById("memoInput").value = entry.memo;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('エントリの読み込みに失敗しました');
             }
         }
 
-        function saveEntry() {
+        async function saveEntry() {
             let params = new URLSearchParams(window.location.search);
             let index = params.get("index");
             let number = document.getElementById("numberInput").value;
             let name = document.getElementById("nameInput").value;
             let memo = document.getElementById("memoInput").value;
             let timestamp = new Date().toLocaleString();
+
             if (number.length !== 3 || name.trim() === "") {
                 alert("3桁の番号と名前を入力してください");
                 return;
             }
-            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-            entries[index] = { number, name, memo, timestamp };
-            localStorage.setItem("entries", JSON.stringify(entries));
-            window.location.href = "admin.html";
+
+            let entry = { number, name, memo, timestamp };
+
+            try {
+                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(entry)
+                });
+
+                if (response.ok) {
+                    window.location.href = "admin.html";
+                } else {
+                    alert('エントリの保存に失敗しました');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('エントリの保存に失敗しました');
+            }
         }
 
         function cancel() {
             window.location.href = "admin.html";
         }
 
-        function confirmDelete() {
+        async function confirmDelete() {
             if (confirm("本当に削除しますか？")) {
                 deleteEntry();
             }
         }
 
-        function deleteEntry() {
+        async function deleteEntry() {
             let params = new URLSearchParams(window.location.search);
             let index = params.get("index");
-            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-            entries.splice(index, 1);
-            localStorage.setItem("entries", JSON.stringify(entries));
-            window.location.href = "admin.html";
+
+            try {
+                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    window.location.href = "admin.html";
+                } else {
+                    alert('エントリの削除に失敗しました');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('エントリの削除に失敗しました');
+            }
         }
     </script>
 </body>
