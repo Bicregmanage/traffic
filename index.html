@@ -127,53 +127,42 @@
 
         document.addEventListener("DOMContentLoaded", loadEntries);
 
-        function addEntry() {
-            let number = document.getElementById("numberInput").value;
-            let name = document.getElementById("nameInput").value;
-            let memo = document.getElementById("memoInput").value;
-            let timestamp = new Date().toLocaleString();
-            if (number.length !== 3 || name.trim() === "") {
-                alert("3桁の番号と名前を入力してください");
-                return;
-            }
-            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-            entries.push({ number, name, memo, timestamp });
-            localStorage.setItem("entries", JSON.stringify(entries));
-            document.getElementById("numberInput").value = "";
-            document.getElementById("nameInput").value = "";
-            document.getElementById("memoInput").value = "";
-            loadEntries();
-        }
+        async function loadEntries() {
+            try {
+                let response = await fetch('https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries');
+                let entries = await response.json();
+                let entryList = document.getElementById("entryList");
+                entryList.innerHTML = "";
 
-        function loadEntries() {
-            let entryList = document.getElementById("entryList");
-            entryList.innerHTML = "";
-            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-            entries.forEach((entry, index) => {
-                let tr = document.createElement("tr");
-                let numberTd = document.createElement("td");
-                numberTd.textContent = entry.number;
-                let nameTd = document.createElement("td");
-                nameTd.textContent = entry.name;
-                nameTd.className = "name-cell";
-                let memoTd = document.createElement("td");
-                memoTd.textContent = entry.memo;
-                memoTd.className = "memo-cell";
-                let timestampTd = document.createElement("td");
-                timestampTd.textContent = entry.timestamp;
-                let actionTd = document.createElement("td");
-                let editBtn = document.createElement("button");
-                editBtn.textContent = "編集";
-                editBtn.className = "edit-btn";
-                editBtn.onclick = () => alert('管理者のみ編集可能');
-                actionTd.appendChild(editBtn);
-                tr.appendChild(numberTd);
-                tr.appendChild(nameTd);
-                tr.appendChild(memoTd);
-                tr.appendChild(timestampTd);
-                tr.appendChild(actionTd);
-                entryList.appendChild(tr);
-            });
+                entries.forEach((entry, index) => {
+                    let tr = document.createElement("tr");
+                    let numberTd = document.createElement("td");
+                    numberTd.textContent = entry.number;
+                    let nameTd = document.createElement("td");
+                    nameTd.textContent = entry.name;
+                    nameTd.className = "name-cell";
+                    let memoTd = document.createElement("td");
+                    memoTd.textContent = entry.memo;
+                    memoTd.className = "memo-cell";
+                    let timestampTd = document.createElement("td");
+                    timestampTd.textContent = entry.timestamp;
+                    let actionTd = document.createElement("td");
+                    let editBtn = document.createElement("button");
+                    editBtn.textContent = "編集";
+                    editBtn.className = "edit-btn";
+                    editBtn.onclick = () => window.location.href = `edit.html?index=${index}`;
+                    actionTd.appendChild(editBtn);
+                    tr.appendChild(numberTd);
+                    tr.appendChild(nameTd);
+                    tr.appendChild(memoTd);
+                    tr.appendChild(timestampTd);
+                    tr.appendChild(actionTd);
+                    entryList.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('エントリの読み込みに失敗しました');
+            }
         }
 
         function searchEntries() {
