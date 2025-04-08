@@ -5,7 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>編集ページ</title>
     <style>
-        /* スタイルはそのまま */
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f0f0f0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container { 
+            width: 500px; 
+            padding: 20px; 
+            background-color: #fff; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+            border-radius: 8px; 
+            text-align: center; 
+            margin-top: 50px; /* 上部に余裕を持たせる */
+        }
+        input, textarea { 
+            margin: 10px 0; 
+            padding: 10px; 
+            width: calc(100% - 22px); 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+        }
+        button { 
+            padding: 10px 20px; 
+            margin: 10px 5px; 
+            border: none; 
+            border-radius: 4px; 
+            background-color: #007bff; 
+            color: white; 
+            cursor: pointer; 
+        }
+        button:hover { 
+            background-color: #0056b3; 
+        }
+        .delete-btn { 
+            background-color: red; 
+        }
+        .delete-btn:hover { 
+            background-color: darkred; 
+        }
     </style>
 </head>
 <body>
@@ -55,38 +97,6 @@
         }
 
         async function saveEntry() {
-            // 保存機能のコード
-        }
-
-        function cancel() {
-            window.location.href = "admin.html";
-        }
-
-        async function confirmDelete() {
-            if (confirm("本当に削除しますか？")) {
-                deleteEntry();
-            }
-        }
-
-        async function deleteEntry() {
-            let params = new URLSearchParams(window.location.search);
-            let index = params.get("index");
-            try {
-                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    window.location.href = "admin.html";
-                } else {
-                    alert('エントリの削除に失敗しました');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('エントリの削除に失敗しました');
-            }
-        }
-
-        async function saveEntry() {
             let params = new URLSearchParams(window.location.search);
             let index = params.get("index");
             let number = document.getElementById("numberInput").value;
@@ -102,7 +112,7 @@
             let entry = { number, name, memo, timestamp };
 
             try {
-                let response = await fetch(`https://<API_GATEWAY_URL>/entries/${index}`, {
+                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -136,7 +146,7 @@
             let index = params.get("index");
 
             try {
-                let response = await fetch(`https://<API_GATEWAY_URL>/entries/${index}`, {
+                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`, {
                     method: 'DELETE'
                 });
 
