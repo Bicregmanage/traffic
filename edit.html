@@ -66,11 +66,25 @@
         async function loadEntry() {
             let params = new URLSearchParams(window.location.search);
             let index = params.get("index");
-
+            
+            console.log("Index:", index);
+            
             try {
                 let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`);
+                
+                console.log("Response status:", response.status);
+                
+                if (!response.ok) {
+                    let errorText = await response.text();
+                    console.error('Failed to load entry:', errorText);
+                    alert('エントリの読み込みに失敗しました: ' + errorText);
+                    return;
+                }
+                
                 let entry = await response.json();
-
+                
+                console.log("Entry:", entry);
+                
                 if (entry) {
                     document.getElementById("numberInput").value = entry.number;
                     document.getElementById("nameInput").value = entry.name;
@@ -78,9 +92,10 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('エントリの読み込みに失敗しました');
+                alert('エントリの読み込みに失敗しました: ' + error.message);
             }
         }
+
 
         async function saveEntry() {
             let params = new URLSearchParams(window.location.search);
