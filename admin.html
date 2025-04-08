@@ -170,10 +170,19 @@
         async function loadEntries() {
             try {
                 let response = await fetch('https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries');
+                
+                console.log("Response status:", response.status);
+                
+                if (!response.ok) {
+                    let errorText = await response.text();
+                    console.error('Failed to load entries:', errorText);
+                    alert('エントリの読み込みに失敗しました: ' + errorText);
+                    return;
+                }
+                
                 let entries = await response.json();
                 let entryList = document.getElementById("entryList");
                 entryList.innerHTML = "";
-
                 entries.forEach((entry, index) => {
                     let tr = document.createElement("tr");
                     let numberTd = document.createElement("td");
@@ -201,10 +210,10 @@
                 });
             } catch (error) {
                 console.error('Error:', error);
-                alert('エントリの読み込みに失敗しました');
+                alert('エントリの読み込みに失敗しました: ' + error.message);
             }
         }
-
+        
         function searchEntries() {
             let searchInput = document.getElementById("searchInput").value.toLowerCase();
             let entryList = document.getElementById("entryList");
