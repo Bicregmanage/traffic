@@ -70,21 +70,18 @@
             console.log("Index:", index);
             
             try {
-                let response = await fetch(`https://your-api-id.execute-api.us-east-2.amazonaws.com/entries/${index}`);
+                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`);
                 
                 console.log("Response status:", response.status);
                 
-                // レスポンスの内容を確認
-                let responseText = await response.text();
-                console.log("Response text:", responseText);
-                
                 if (!response.ok) {
-                    console.error('Failed to load entry:', responseText);
-                    alert('エントリの読み込みに失敗しました: ' + responseText);
+                    let errorText = await response.text();
+                    console.error('Failed to load entry:', errorText);
+                    alert('エントリの読み込みに失敗しました: ' + errorText);
                     return;
                 }
                 
-                let entry = JSON.parse(responseText);
+                let entry = await response.mjs();
                 
                 console.log("Entry:", entry);
                 
