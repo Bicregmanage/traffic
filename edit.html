@@ -70,7 +70,7 @@
             console.log("Index:", index);
             
             try {
-                let response = await fetch(`https://ntgq48z7b0.execute-api.us-east-2.amazonaws.com/dev/entries/${index}`);
+                let response = await fetch(`https://ntgq48z7b0.execute-api.us-east-2.amazonaws.com/dev/entries/{index}`);
                 
                 console.log("Response status:", response.status);
                 
@@ -112,7 +112,7 @@
             let entry = { number, name, memo, timestamp };
 
             try {
-                let response = await fetch(`https://ntgq48z7b0.execute-api.us-east-2.amazonaws.com/dev/entries/${index}`, {
+                let response = await fetch(`https://ntgq48z7b0.execute-api.us-east-2.amazonaws.com/dev/entries/{index}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -146,7 +146,7 @@
             let index = params.get("index");
 
             try {
-                let response = await fetch(`https://ntgq48z7b0.execute-api.us-east-2.amazonaws.com/dev/entries/${index}`, {
+                let response = await fetch(`https://ntgq48z7b0.execute-api.us-east-2.amazonaws.com/dev/entries/{index}`, {
                     method: 'DELETE'
                 });
 
