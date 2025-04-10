@@ -1,97 +1,229 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>登録番号検索</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      margin: 2em;
-      background-color: #f9f9f9;
-    }
-    h2 {
-      color: #333;
-    }
-    input, button {
-      margin: 0.5em 0;
-      padding: 0.5em;
-      font-size: 1em;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.6em;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-      cursor: pointer;
-    }
-    tr:hover {
-      background-color: #f5f5f5;
-    }
-    #resultTable tr:first-child {
-      background-color: #ddd;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登録番号検索システム</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f0f0f0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container { 
+            width: 500px; 
+            padding: 20px; 
+            background-color: #fff; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+            border-radius: 8px; 
+            text-align: center; 
+            margin-top: 8%;
+        }
+        input, textarea { 
+            margin: 10px 0; 
+            padding: 10px; 
+            width: calc(100% - 22px); 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+        }
+        button { 
+            padding: 10px 20px; 
+            margin: 10px 5px; 
+            border: none; 
+            border-radius: 4px; 
+            background-color: #007bff; 
+            color: white; 
+            cursor: pointer; 
+        }
+        button:hover { 
+            background-color: #0056b3; 
+        }
+        .table-container { 
+            max-height: 300px; 
+            overflow-y: auto; 
+            margin-top: 20px; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        th, td { 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #f9f9f9; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        .edit-btn { 
+            background-color: gray; 
+            color: white; 
+            border: none; 
+            padding: 5px; 
+            cursor: pointer; 
+            margin-left: 5px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        .edit-btn:hover {
+            background-color: gray;
+        }
+        .sort-btn { 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            cursor: pointer; 
+            margin-left: 5px; 
+        }
+        .sort-btn:hover { 
+            background-color: #218838; 
+        }
+        .name-cell, .memo-cell { 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+    </style>
 </head>
 <body>
-  <h2>登録番号検索システム</h2>
-  <input type="text" id="searchInput" placeholder="番号または名前で検索">
-  <button onclick="location.href='login.html'">管理者ページへ</button>
-  <table id="resultTable"></table>
+    <div class="container">
+        <h2>登録番号検索システム</h2>
+        <button onclick="location.href='login.html'">管理者ページへ</button>
+        <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
+        <div>
+            <select id="sortSelect" onchange="sortTable()">
+                <option value="number">番号でソート</option>
+                <option value="name">名前でソート</option>
+                <option value="timestamp">追加日時でソート</option>
+            </select>
+            <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>番号</th>
+                        <th>名前</th>
+                        <th>メモ</th>
+                        <th>追加日時</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="entryList"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        let sortDirection = true; // true: ascending, false: descending
 
-  <script>
-    let entries = [];
-    let sortKey = '';
-    let sortAsc = true;
+        document.addEventListener("DOMContentLoaded", loadEntries);
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const res = await fetch("https://nviw8q63ak.execute-api.us-east-2.amazonaws.com/entries");
-      entries = await res.json();
-      display(entries);
-    });
+        async function loadEntries() {
+            try {
+                let response = await fetch('https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries');
+                let MyFunction = await response.json();
+                let entryList = document.getElementById("entryList");
+                entryList.innerHTML = "";
 
-    document.getElementById("searchInput").addEventListener("input", function () {
-      const q = this.value.toLowerCase();
-      const filtered = entries.filter(e =>
-        e.number.includes(q) || e.name.toLowerCase().includes(q)
-      );
-      display(filtered);
-    });
+                entries.forEach((entry, index) => {
+                    let tr = document.createElement("tr");
+                    let numberTd = document.createElement("td");
+                    numberTd.textContent = entry.number;
+                    let nameTd = document.createElement("td");
+                    nameTd.textContent = entry.name;
+                    nameTd.className = "name-cell";
+                    let memoTd = document.createElement("td");
+                    memoTd.textContent = entry.memo;
+                    memoTd.className = "memo-cell";
+                    let timestampTd = document.createElement("td");
+                    timestampTd.textContent = entry.timestamp;
+                    let actionTd = document.createElement("td");
+                    let editBtn = document.createElement("button");
+                    editBtn.textContent = "編集";
+                    editBtn.className = "edit-btn";
+                    editBtn.onclick = () => window.location.href = `edit.html?index=${index}`;
+                    actionTd.appendChild(editBtn);
+                    tr.appendChild(numberTd);
+                    tr.appendChild(nameTd);
+                    tr.appendChild(memoTd);
+                    tr.appendChild(timestampTd);
+                    tr.appendChild(actionTd);
+                    entryList.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('エントリの読み込みに失敗しました');
+            }
+        }
 
-    function display(data) {
-      const table = document.getElementById("resultTable");
-      table.innerHTML = `<tr>
-        <th onclick="sortBy('number')">番号</th>
-        <th onclick="sortBy('name')">名前</th>
-        <th onclick="sortBy('memo')">メモ</th>
-        <th onclick="sortBy('timestamp')">日時</th>
-      </tr>`;
-      data.forEach(e => {
-        table.innerHTML += `<tr>
-          <td>${e.number}</td>
-          <td>${e.name}</td>
-          <td>${e.memo}</td>
-          <td>${e.timestamp}</td>
-        </tr>`;
-      });
-    }
+        function searchEntries() {
+            let searchInput = document.getElementById("searchInput").value.toLowerCase();
+            let entryList = document.getElementById("entryList");
+            entryList.innerHTML = "";
+            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+            let filteredEntries = entries.filter(entry => 
+                entry.number.includes(searchInput) || entry.name.toLowerCase().includes(searchInput)
+            );
+            filteredEntries.forEach((entry, index) => {
+                let tr = document.createElement("tr");
+                let numberTd = document.createElement("td");
+                numberTd.textContent = entry.number;
+                let nameTd = document.createElement("td");
+                nameTd.textContent = entry.name;
+                nameTd.className = "name-cell";
+                let memoTd = document.createElement("td");
+                memoTd.textContent = entry.memo;
+                memoTd.className = "memo-cell";
+                let timestampTd = document.createElement("td");
+                timestampTd.textContent = entry.timestamp;
+                let actionTd = document.createElement("td");
+                let editBtn = document.createElement("button");
+                editBtn.textContent = "編集";
+                editBtn.className = "edit-btn";
+                editBtn.onclick = () => window.location.href = `edit.html?index=${index}`;
+                actionTd.appendChild(editBtn);
+                tr.appendChild(numberTd);
+                tr.appendChild(nameTd);
+                tr.appendChild(memoTd);
+                tr.appendChild(timestampTd);
+                tr.appendChild(actionTd);
+                entryList.appendChild(tr);
+            });
+        }
 
-    function sortBy(key) {
-      sortAsc = (sortKey === key) ? !sortAsc : true;
-      sortKey = key;
-      const sorted = [...entries].sort((a, b) => {
-        if (a[key] < b[key]) return sortAsc ? -1 : 1;
-        if (a[key] > b[key]) return sortAsc ? 1 : -1;
-        return 0;
-      });
-      display(sorted);
-    }
-  </script>
+        function sortTable() {
+            let sortSelect = document.getElementById("sortSelect").value;
+            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+            entries.sort((a, b) => {
+                let valueA = a[sortSelect];
+                let valueB = b[sortSelect];
+                if (sortSelect === "number") { // Sort by number
+                    valueA = parseInt(valueA);
+                    valueB = parseInt(valueB);
+                }
+                if (sortDirection) {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+            localStorage.setItem("entries", JSON.stringify(entries));
+            loadEntries();
+        }
+
+        function toggleSortDirection() {
+            sortDirection = !sortDirection;
+            sortTable();
+        }
+    </script>
 </body>
 </html>
