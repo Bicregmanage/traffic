@@ -5,93 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登録番号検索システム</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background-color: #f0f0f0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        .container { 
-            width: 500px; 
-            padding: 20px; 
-            background-color: #fff; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-            border-radius: 8px; 
-            text-align: center; 
-            margin-top: 8%;
-        }
-        input, textarea { 
-            margin: 10px 0; 
-            padding: 10px; 
-            width: calc(100% - 22px); 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-        }
-        button { 
-            padding: 10px 20px; 
-            margin: 10px 5px; 
-            border: none; 
-            border-radius: 4px; 
-            background-color: #007bff; 
-            color: white; 
-            cursor: pointer; 
-        }
-        button:hover { 
-            background-color: #0056b3; 
-        }
-        .table-container { 
-            max-height: 300px; 
-            overflow-y: auto; 
-            margin-top: 20px; 
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-        th, td { 
-            padding: 10px; 
-            border: 1px solid #ccc; 
-            text-align: left; 
-        }
-        th { 
-            background-color: #f9f9f9; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        .edit-btn { 
-            background-color: gray; 
-            color: white; 
-            border: none; 
-            padding: 5px; 
-            cursor: pointer; 
-            margin-left: 5px; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        .edit-btn:hover {
-            background-color: gray;
-        }
-        .sort-btn { 
-            background-color: #28a745; 
-            color: white; 
-            border: none; 
-            padding: 5px 10px; 
-            cursor: pointer; 
-            margin-left: 5px; 
-        }
-        .sort-btn:hover { 
-            background-color: #218838; 
-        }
-        .name-cell, .memo-cell { 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
+        body { font-family: Arial, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { width: 500px; padding: 20px; background-color: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px; text-align: center; margin-top: 8%; }
+        input, textarea { margin: 10px 0; padding: 10px; width: calc(100% - 22px); border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; margin: 10px 5px; border: none; border-radius: 4px; background-color: #007bff; color: white; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .table-container { max-height: 300px; overflow-y: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+        th { background-color: #f9f9f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .edit-btn { background-color: gray; color: white; border: none; padding: 5px; cursor: pointer; margin-left: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .edit-btn:hover { background-color: gray; }
+        .sort-btn { background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 5px; }
+        .sort-btn:hover { background-color: #218838; }
+        .name-cell, .memo-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     </style>
 </head>
 <body>
@@ -123,101 +50,58 @@
         </div>
     </div>
     <script>
-        let sortDirection = true; // true: ascending, false: descending
+        let sortDirection = true;
+        let entries = [];
 
         document.addEventListener("DOMContentLoaded", loadEntries);
 
         async function loadEntries() {
             try {
-                let response = await fetch('https://ntgq48z7b0.execute-api.us-east-2.amazonaws.com/dev/entries');
-                let entries = await response.json();
-                let entryList = document.getElementById("entryList");
-                entryList.innerHTML = "";
-
-                entries.forEach((entry, index) => {
-                    let tr = document.createElement("tr");
-                    let numberTd = document.createElement("td");
-                    numberTd.textContent = entry.number;
-                    let nameTd = document.createElement("td");
-                    nameTd.textContent = entry.name;
-                    nameTd.className = "name-cell";
-                    let memoTd = document.createElement("td");
-                    memoTd.textContent = entry.memo;
-                    memoTd.className = "memo-cell";
-                    let timestampTd = document.createElement("td");
-                    timestampTd.textContent = entry.timestamp;
-                    let actionTd = document.createElement("td");
-                    let editBtn = document.createElement("button");
-                    editBtn.textContent = "編集";
-                    editBtn.className = "edit-btn";
-                    editBtn.onclick = () => window.location.href = `edit.html?index=${index}`;
-                    actionTd.appendChild(editBtn);
-                    tr.appendChild(numberTd);
-                    tr.appendChild(nameTd);
-                    tr.appendChild(memoTd);
-                    tr.appendChild(timestampTd);
-                    tr.appendChild(actionTd);
-                    entryList.appendChild(tr);
-                });
+                let response = await fetch('https://nviw8q63ak.execute-api.us-east-2.amazonaws.com/entries');
+                entries = await response.json();
+                displayEntries(entries);
             } catch (error) {
                 console.error('Error:', error);
                 alert('エントリの読み込みに失敗しました');
             }
         }
 
-        function searchEntries() {
-            let searchInput = document.getElementById("searchInput").value.toLowerCase();
+        function displayEntries(entriesToDisplay) {
             let entryList = document.getElementById("entryList");
             entryList.innerHTML = "";
-            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-            let filteredEntries = entries.filter(entry => 
-                entry.number.includes(searchInput) || entry.name.toLowerCase().includes(searchInput)
-            );
-            filteredEntries.forEach((entry, index) => {
+            entriesToDisplay.forEach((entry, index) => {
                 let tr = document.createElement("tr");
-                let numberTd = document.createElement("td");
-                numberTd.textContent = entry.number;
-                let nameTd = document.createElement("td");
-                nameTd.textContent = entry.name;
-                nameTd.className = "name-cell";
-                let memoTd = document.createElement("td");
-                memoTd.textContent = entry.memo;
-                memoTd.className = "memo-cell";
-                let timestampTd = document.createElement("td");
-                timestampTd.textContent = entry.timestamp;
-                let actionTd = document.createElement("td");
-                let editBtn = document.createElement("button");
-                editBtn.textContent = "編集";
-                editBtn.className = "edit-btn";
-                editBtn.onclick = () => window.location.href = `edit.html?index=${index}`;
-                actionTd.appendChild(editBtn);
-                tr.appendChild(numberTd);
-                tr.appendChild(nameTd);
-                tr.appendChild(memoTd);
-                tr.appendChild(timestampTd);
-                tr.appendChild(actionTd);
+                tr.innerHTML = `
+                    <td>${entry.number}</td>
+                    <td class="name-cell">${entry.name}</td>
+                    <td class="memo-cell">${entry.memo}</td>
+                    <td>${entry.timestamp}</td>
+                    <td><button class="edit-btn" onclick="location.href='edit.html?index=${index}'">編集</button></td>
+                `;
                 entryList.appendChild(tr);
             });
         }
 
+        function searchEntries() {
+            let searchInput = document.getElementById("searchInput").value.toLowerCase();
+            let filtered = entries.filter(entry =>
+                entry.number.includes(searchInput) || entry.name.toLowerCase().includes(searchInput)
+            );
+            displayEntries(filtered);
+        }
+
         function sortTable() {
             let sortSelect = document.getElementById("sortSelect").value;
-            let entries = JSON.parse(localStorage.getItem("entries") || "[]");
             entries.sort((a, b) => {
                 let valueA = a[sortSelect];
                 let valueB = b[sortSelect];
-                if (sortSelect === "number") { // Sort by number
+                if (sortSelect === "number") {
                     valueA = parseInt(valueA);
                     valueB = parseInt(valueB);
                 }
-                if (sortDirection) {
-                    return valueA > valueB ? 1 : -1;
-                } else {
-                    return valueA < valueB ? 1 : -1;
-                }
+                return sortDirection ? (valueA > valueB ? 1 : -1) : (valueA < valueB ? 1 : -1);
             });
-            localStorage.setItem("entries", JSON.stringify(entries));
-            loadEntries();
+            displayEntries(entries);
         }
 
         function toggleSortDirection() {
