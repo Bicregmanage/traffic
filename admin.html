@@ -55,94 +55,40 @@
     </div>
 </div>
 <script>
-    let sortDirection = true;
-    let entries = [];
-
-    document.addEventListener("DOMContentLoaded", loadEntries);
-
+    async function load() {
+      const res = await fetch("https://nviw8q63ak.execute-api.us-east-2.amazonaws.com/entries");
+      const data = await res.json();
+      window.allEntries = data;
+      display(data);
+    }
+    load();
+    function display(data) {
+      const table = document.getElementById("resultTable");
+      table.innerHTML = "<tr><th>番号</th><th>名前</th><th>メモ</th><th>日時</th><th>操作</th></tr>";
+      data.forEach(e => {
+        table.innerHTML += `<tr>
+          <td>${e.number}</td><td>${e.name}</td><td>${e.memo}</td><td>${e.timestamp}</td>
+          <td><button onclick="location.href='edit.html?id=${e.id}'">編集</button></td>
+        </tr>`;
+      });
+    }
+    document.getElementById("searchInput").addEventListener("input", function() {
+      const q = this.value.toLowerCase();
+      const filtered = window.allEntries.filter(e => e.number.includes(q) || e.name.toLowerCase().includes(q));
+      display(filtered);
+    });
     async function addEntry() {
-        const number = document.getElementById("numberInput").value;
-        const name = document.getElementById("nameInput").value;
-        const memo = document.getElementById("memoInput").value;
-        const timestamp = new Date().toLocaleString();
-
-        if (number.length !== 3 || name.trim() === "") {
-            alert("3桁の番号と名前を入力してください");
-            return;
-        }
-
-        const entry = { number, name, memo, timestamp };
-
-        try {
-            const response = await fetch('https://nviw8q63ak.execute-api.us-east-2.amazonaws.com/entries', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(entry)
-            });
-            if (response.ok) {
-                loadEntries();
-            } else {
-                alert('エントリの追加に失敗しました');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('エントリの追加に失敗しました');
-        }
+      const body = {
+        number: document.getElementById("number").value,
+        name: document.getElementById("name").value,
+        memo: document.getElementById("memo").value,
+        timestamp: new Date().toLocaleString()
+      };
+      await fetch("https://nviw8q63ak.execute-api.us-east-2.amazonaws.com/entries", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+      });
+      load();
     }
-
-    async function loadEntries() {
-        try {
-            const response = await fetch('https://nviw8q63ak.execute-api.us-east-2.amazonaws.com/entries');
-            entries = await response.json();
-            displayEntries(entries);
-        } catch (error) {
-            console.error('Error:', error);
-            alert('エントリの読み込みに失敗しました');
-        }
-    }
-
-    function displayEntries(entriesToDisplay) {
-        const entryList = document.getElementById("entryList");
-        entryList.innerHTML = "";
-        entriesToDisplay.forEach((entry, index) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${entry.number}</td>
-                <td class="name-cell">${entry.name}</td>
-                <td class="memo-cell">${entry.memo}</td>
-                <td>${entry.timestamp}</td>
-                <td><button class="edit-btn" onclick="location.href='edit.html?index=${index}'">編集</button></td>
-            `;
-            entryList.appendChild(tr);
-        });
-    }
-
-    function searchEntries() {
-        const searchInput = document.getElementById("searchInput").value.toLowerCase();
-        const filtered = entries.filter(entry =>
-            entry.number.includes(searchInput) || entry.name.toLowerCase().includes(searchInput)
-        );
-        displayEntries(filtered);
-    }
-
-    function sortTable() {
-        const sortKey = document.getElementById("sortSelect").value;
-        entries.sort((a, b) => {
-            let valueA = a[sortKey];
-            let valueB = b[sortKey];
-            if (sortKey === "number") {
-                valueA = parseInt(valueA);
-                valueB = parseInt(valueB);
-            }
-            return sortDirection ? (valueA > valueB ? 1 : -1) : (valueA < valueB ? 1 : -1);
-        });
-        displayEntries(entries);
-    }
-
-    function toggleSortDirection() {
-        sortDirection = !sortDirection;
-        sortTable();
-    }
-</script>
+  </script>
 </body>
 </html>
