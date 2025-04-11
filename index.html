@@ -4,12 +4,10 @@
   const code = params.get('code');
 
   if (code) {
-    // ログイン後に戻ってきたとき：認可コードを保存
     sessionStorage.setItem('auth_code', code);
   } else {
     const storedCode = sessionStorage.getItem('auth_code');
     if (!storedCode) {
-      // 未ログイン：Hosted UI にリダイレクト
       const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
         '?client_id=67qjddtattdr5i1871723tbtnt' +
         '&response_type=code' +
@@ -121,7 +119,7 @@
 <body>
     <div class="container">
         <h2>登録番号検索システム</h2>
-        <button onclick="location.href='admin.html'">管理者ページへ</button>
+        <button onclick="redirectToAdmin()">管理者ページへ</button>
         <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
         <div>
             <select id="sortSelect" onchange="sortTable()">
@@ -145,6 +143,14 @@
         </div>
     </div>
     <script>
+        function redirectToAdmin() {
+          const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+            '?client_id=67qjddtattdr5i1871723tbtnt' +
+            '&response_type=token' +
+            '&scope=email+openid' +
+            '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
+          window.location.href = loginUrl;
+        }
         let sortDirection = true;
     
         document.addEventListener("DOMContentLoaded", loadEntries);
