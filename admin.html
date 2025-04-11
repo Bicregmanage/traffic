@@ -248,18 +248,26 @@
         }
     
         function sortTable() {
-            let key = document.getElementById("sortSelect").value;
-            let sorted = [...window.entries].sort((a, b) => {
-                let valA = a[key], valB = b[key];
-                if (key === "number") {
-                    valA = parseInt(valA);
-                    valB = parseInt(valB);
-                }
-                return sortDirection ? valA > valB ? 1 : -1 : valA < valB ? 1 : -1;
-            });
-            renderEntries(sorted);
-        }
-    
+	    const key = document.getElementById("sortSelect").value;
+	
+	    const sorted = [...window.entries].sort((a, b) => {
+	        let valA = a[key];
+	        let valB = b[key];
+	
+	        if (key === "number") {
+	            valA = parseInt(valA);
+	            valB = parseInt(valB);
+	            return sortDirection ? valA - valB : valB - valA;
+	        } else {
+	            return sortDirection
+	                ? valA.localeCompare(valB, 'ja')
+	                : valB.localeCompare(valA, 'ja');
+	        }
+	    });
+	
+	    renderEntries(sorted);
+	}
+
         function toggleSortDirection() {
             sortDirection = !sortDirection;
             sortTable();
