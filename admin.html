@@ -149,6 +149,24 @@
         </div>
     </div>
     <script>
+	const params = new URLSearchParams(window.location.search);
+		const code = params.get('code');
+		
+		if (code) {
+		// ログイン後のリダイレクト時（認可コードあり）
+		sessionStorage.setItem('auth_code', code);
+		} else {
+		const storedCode = sessionStorage.getItem('auth_code');
+		if (!storedCode) {
+		// 未ログイン → Hosted UI にリダイレクト
+		const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+		'?client_id=67qjddtattdr5i1871723tbtnt' +
+		'&response_type=code' +
+		'&scope=email+openid+phone' +
+		'&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Fadmin.html';
+		window.location.href = loginUrl;
+		}
+	}
         let sortDirection = true;
     
         document.addEventListener("DOMContentLoaded", loadEntries);
