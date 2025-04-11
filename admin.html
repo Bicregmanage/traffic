@@ -135,50 +135,55 @@
         document.addEventListener("DOMContentLoaded", loadEntries);
     
         async function addEntry() {
-            const number = document.getElementById("numberInput").value;
-            const name = document.getElementById("nameInput").value;
-            const memo = document.getElementById("memoInput").value;
-            const timestamp = new Date().toLocaleString();
+    			const number = document.getElementById("numberInput").value;
+    			const name = document.getElementById("nameInput").value;
+    			const memo = document.getElementById("memoInput").value;
+    			const timestamp = new Date().toLocaleString();
 
-            if (number.length !== 3 || name.trim() === "") {
-                alert("3桁の番号と名前を入力してください");
-                return;
-            }
+    			if (number.length !== 3 || name.trim() === "") {
+        			alert("3桁の番号と名前を入力してください");
+        			return;
+    			}
 
-            try {
-                const check = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
-                const existing = await check.json();
+    			try {
+        			const check = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
+        			const existing = await check.json();
 
-                if (existing.length > 0) {
-                    alert("この番号はすでに登録されています");
-                    return;
-                }
-            } catch (error) {
-                console.error("登録チェックに失敗:", error);
-                alert("登録チェックに失敗しました");
-                return;
-            }
+        			if (existing.length > 0) {
+            			alert("この番号はすでに登録されています");
+            			return;
+        			}
+    			} catch (error) {
+        			console.error("登録チェックに失敗:", error);
+        			alert("登録チェックに失敗しました");
+        			return;
+    			}
 
-            const entry = { number, name, memo, timestamp };
+    			const entry = { number, name, memo, timestamp };
 
-            try {
-                const response = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(entry)
-                });
+    			try {
+        			const response = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
+            			method: "POST",
+            			headers: { "Content-Type": "application/json" },
+            			body: JSON.stringify(entry)
+        			});
 
-                if (response.ok) {
-                    alert("登録しました");
-                    loadEntries(); 
-                } else {
-                    alert("登録に失敗しました");
-                }
-            } catch (error) {
-                console.error("登録エラー:", error);
-                alert("登録に失敗しました");
-            }
-        }
+        		if (response.ok) {
+            alert("登録しました");
+
+            		document.getElementById("numberInput").value = "";
+            		document.getElementById("nameInput").value = "";
+            		document.getElementById("memoInput").value = "";
+
+            		loadEntries();
+        		} else {
+            		alert("登録に失敗しました");
+        		}
+    		} catch (error) {
+        		console.error("登録エラー:", error);
+        		alert("登録に失敗しました");
+    		}
+	}
 
     
         async function loadEntries() {
