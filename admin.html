@@ -94,9 +94,9 @@
         <tr>
           <th>番号</th>
           <th>名前</th>
+          <th>入学年度</th>
           <th>メモ</th>
           <th>追加日時</th>
-          <th>入学年度</th>
           <th>操作</th>
         </tr>
       </thead>
@@ -120,8 +120,8 @@
     async function addEntry() {
       const number = document.getElementById("numberInput").value;
       const name = document.getElementById("nameInput").value;
-      const memo = document.getElementById("memoInput").value;
       const admissionYear = document.getElementById("yearSelect").value;
+      const memo = document.getElementById("memoInput").value;
       const timestamp = new Date().toLocaleString();
 
       if (!number || !name || !admissionYear) {
@@ -179,9 +179,9 @@
         tr.innerHTML = `
           <td>${entry.number}</td>
           <td>${entry.name}</td>
+          <td>${entry.admissionYear || ""}</td>
           <td>${entry.memo}</td>
           <td>${entry.timestamp}</td>
-          <td>${entry.admissionYear || ""}</td>
           <td><button onclick="editEntry('${entry.number}')">編集</button></td>
         `;
         list.appendChild(tr);
