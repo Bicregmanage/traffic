@@ -118,7 +118,6 @@
 <body>
     <div class="container">
         <h2>管理者ページ</h2>
-            <!-- ここに追加機能と編集機能を移動 -->
             <button onclick="location.href='index.html'">一般ページへ</button>
             <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999">
             <input type="text" id="nameInput" placeholder="名前">
@@ -129,7 +128,6 @@
             <div>
                 <select id="sortSelect" onchange="sortTable()">
                     <option value="number">番号でソート</option>
-                    <option value="name">名前でソート</option>
                     <option value="timestamp">追加日時でソート</option>
                 </select>
                 <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
