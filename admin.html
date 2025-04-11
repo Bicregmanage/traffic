@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>登録情報編集</title>
+  <title>管理者ページ</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,15 +12,16 @@
       padding: 20px;
     }
     .container {
-      max-width: 500px;
+      max-width: 700px;
       margin: 40px auto;
-      background-color: #fff;
+      background: #fff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
+      margin-bottom: 20px;
     }
     input, textarea, select {
       width: 100%;
@@ -31,68 +32,105 @@
       box-sizing: border-box;
     }
     .button-group {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 20px;
+      text-align: center;
+      margin-bottom: 15px;
     }
     .btn-main {
+      padding: 10px 20px;
+      margin: 8px;
       background-color: #007bff;
       color: white;
       border: none;
-      padding: 10px 20px;
       border-radius: 4px;
       cursor: pointer;
     }
     .btn-main:hover {
       background-color: #0056b3;
     }
-    .btn-danger {
-      background-color: #dc3545;
+    .sort-btn {
+      background-color: #28a745;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    .sort-btn:hover {
+      background-color: #218838;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .edit-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border: none;
       border-radius: 4px;
       cursor: pointer;
     }
-    .btn-danger:hover {
-      background-color: #c82333;
-    }
-    .btn-cancel {
-      background-color: #6c757d;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn-cancel:hover {
-      background-color: #5a6268;
+    .edit-btn:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>登録情報編集</h2>
-    <input type="text" id="numberInput" placeholder="番号">
+    <h2>管理者ページ</h2>
+    <div class="button-group">
+      <button class="btn-main" onclick="location.href='index.html'">一般ページへ</button>
+    </div>
+
+    <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999">
     <input type="text" id="nameInput" placeholder="名前">
     <select id="admissionYearSelect"></select>
     <textarea id="memoInput" placeholder="メモ"></textarea>
 
     <div class="button-group">
-      <button class="btn-main" onclick="saveEntry()">保存</button>
-      <button class="btn-danger" onclick="deleteEntry()">削除</button>
-      <button class="btn-cancel" onclick="cancelEdit()">キャンセル</button>
+      <button class="btn-main" onclick="addEntry()">登録番号の追加</button>
     </div>
+
+    <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
+    <div style="margin-top: 10px;">
+      <select id="sortSelect" onchange="sortTable()">
+        <option value="number">番号でソート</option>
+        <option value="timestamp">追加日時でソート</option>
+      </select>
+      <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>番号</th>
+          <th>名前</th>
+          <th>入学年度</th>
+          <th>メモ</th>
+          <th>追加日時</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="entryList"></tbody>
+    </table>
   </div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const originalNumber = urlParams.get('number');
+    let sortDirection = true;
 
     document.addEventListener("DOMContentLoaded", () => {
       loadYears();
-      loadEntry();
+      loadEntries();
     });
 
     function loadYears() {
@@ -106,91 +144,114 @@
       }
     }
 
-    async function loadEntry() {
-      try {
-        const res = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${originalNumber}`);
-        const data = await res.json();
-        if (data.length > 0) {
-          const entry = data[0];
-          document.getElementById("numberInput").value = entry.number;
-          document.getElementById("nameInput").value = entry.name;
-          document.getElementById("admissionYearSelect").value = entry.admissionYear || "";
-          document.getElementById("memoInput").value = entry.memo || "";
-        } else {
-          alert("データが見つかりませんでした");
-        }
-      } catch (e) {
-        console.error("読み込み失敗:", e);
-        alert("読み込みに失敗しました");
-      }
-    }
-
-    async function saveEntry() {
+    async function addEntry() {
       const number = document.getElementById("numberInput").value;
       const name = document.getElementById("nameInput").value;
       const admissionYear = document.getElementById("admissionYearSelect").value;
       const memo = document.getElementById("memoInput").value;
+      const timestamp = new Date().toLocaleString();
 
-      const updated = {
-        number,
-        name,
-        admissionYear,
-        memo,
-        timestamp: new Date().toLocaleString()
-      };
+      if (number.length !== 3 || !name || !admissionYear) {
+        alert("番号・名前・入学年度は必須です。");
+        return;
+      }
 
-      // 削除 → 新規追加（番号が変更される可能性があるため）
       try {
-        if (number !== originalNumber) {
-          await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ number: originalNumber })
-          });
-        }
-
-        const res = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updated)
-        });
-
-        if (res.ok) {
-          alert("変更内容を保存しました");
-          window.location.href = "admin.html";
-        } else {
-          alert("保存に失敗しました");
+        const check = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
+        const exists = await check.json();
+        if (exists.length > 0) {
+          alert("この番号はすでに登録されています。");
+          return;
         }
       } catch (e) {
-        console.error("保存エラー:", e);
-        alert("保存に失敗しました");
+        console.error("重複チェック失敗:", e);
+        alert("登録前のチェックに失敗しました。");
+        return;
       }
-    }
 
-    async function deleteEntry() {
-      if (!confirm("本当に削除しますか？")) return;
+      const entry = { number, name, admissionYear, memo, timestamp };
 
       try {
         const res = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
-          method: "DELETE",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ number: originalNumber })
+          body: JSON.stringify(entry)
         });
-
         if (res.ok) {
-          alert("削除しました");
-          window.location.href = "admin.html";
+          alert("登録しました。");
+          document.getElementById("numberInput").value = "";
+          document.getElementById("nameInput").value = "";
+          document.getElementById("memoInput").value = "";
+          loadEntries();
         } else {
-          alert("削除に失敗しました");
+          alert("登録に失敗しました。");
         }
       } catch (e) {
-        console.error("削除エラー:", e);
-        alert("削除に失敗しました");
+        console.error("登録エラー:", e);
+        alert("登録に失敗しました。");
       }
     }
 
-    function cancelEdit() {
-      window.location.href = "admin.html";
+    async function loadEntries() {
+      try {
+        const res = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries");
+        const data = await res.json();
+        window.entries = data;
+        renderEntries(data);
+      } catch (e) {
+        console.error("読み込み失敗:", e);
+        alert("エントリの読み込みに失敗しました。");
+      }
+    }
+
+    function renderEntries(data) {
+      const list = document.getElementById("entryList");
+      list.innerHTML = "";
+      data.forEach(entry => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${entry.number}</td>
+          <td>${entry.name}</td>
+          <td>${entry.admissionYear || ''}</td>
+          <td>${entry.memo}</td>
+          <td>${entry.timestamp}</td>
+          <td><button class="edit-btn" onclick="editEntry('${entry.number}')">編集</button></td>
+        `;
+        list.appendChild(tr);
+      });
+    }
+
+    function editEntry(number) {
+      window.location.href = `edit.html?number=${number}`;
+    }
+
+    function searchEntries() {
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = window.entries.filter(e =>
+        e.number.includes(keyword) || e.name.toLowerCase().includes(keyword)
+      );
+      renderEntries(filtered);
+    }
+
+    function sortTable() {
+      const key = document.getElementById("sortSelect").value;
+      const sorted = [...window.entries].sort((a, b) => {
+        let aVal = a[key];
+        let bVal = b[key];
+        if (key === "number") {
+          return sortDirection ? aVal - bVal : bVal - aVal;
+        } else {
+          return sortDirection
+            ? aVal.localeCompare(bVal, 'ja')
+            : bVal.localeCompare(aVal, 'ja');
+        }
+      });
+      renderEntries(sorted);
+    }
+
+    function toggleSortDirection() {
+      sortDirection = !sortDirection;
+      sortTable();
     }
   </script>
 </body>
