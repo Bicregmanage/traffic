@@ -125,26 +125,25 @@
         </div>
     </div>
     <script>
-        const params = new URLSearchParams(window.location.hash.substring(1));
-          const idToken = params.get('id_token');
-        
-          if (idToken) {
-            // 認証済み：トークンをセッションストレージに保存（次回以降のページ移動でも保持できるように）
-            sessionStorage.setItem('id_token', idToken);
-          } else {
-            // 前回のセッションから取得
-            const storedToken = sessionStorage.getItem('id_token');
-            if (!storedToken) {
-              // トークンが全くない → ログインへリダイレクト
-              const loginUrl = 'https://bicreg-login.auth.us-east-1.amazoncognito.com/login' +
-                '?client_id=2o6lqmrk4qeaelvbm4avvr8cl4' +
-                '&response_type=token' +
-                '&scope=openid+email+profile' +
-                '&redirect_uri=https://bicregmanage.github.io/traffic/index.html';
-        
-              window.location.href = loginUrl;
+        const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            
+            if (code) {
+            // ログイン後のリダイレクト時に認可コードが含まれていればログイン済みとみなす（開発中でトークン処理をしていない簡易版）
+            sessionStorage.setItem('auth_code', code);
+            } else {
+            // セッションにもコードがない＝未ログインと判定
+            const storedCode = sessionStorage.getItem('auth_code');
+            if (!storedCode) {
+            // 未ログイン：Hosted UI へリダイレクト
+            const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+            '?client_id=67qjddtattdr5i1871723tbtnt' +
+            '&response_type=code' +
+            '&scope=email+openid+phone' +
+            '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Findex.html';
+            window.location.href = loginUrl;
             }
-          }
+        }
         
         let sortDirection = true;
     
