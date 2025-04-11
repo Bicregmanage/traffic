@@ -1,4 +1,41 @@
 <!DOCTYPE html>
+<script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
+
+<script>
+  async function checkAdminAccess() {
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const idToken = params.get('id_token') || sessionStorage.getItem('id_token');
+
+    if (!idToken) {
+      // トークンがない → Hosted UI にリダイレクト
+      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+        '?client_id=67qjddtattdr5i1871723tbtnt' +
+        '&response_type=token' +
+        '&scope=email+openid' +
+        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Fadmin.html';
+      window.location.href = loginUrl;
+      return;
+    }
+
+    // トークンをセッション保存（以降のページ遷移で再利用）
+    sessionStorage.setItem('id_token', idToken);
+
+    // JWTデコード
+    const { decodeJwt } = jose;
+    const payload = decodeJwt(idToken);
+
+    // adminグループチェック
+    const groups = payload['cognito:groups'] || [];
+    if (!groups.includes('admin')) {
+      alert('このページにはアクセスできません（管理者専用）');
+      window.location.href = 'index.html';
+    }
+  }
+
+  checkAdminAccess();
+</script>
+
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
