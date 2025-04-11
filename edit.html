@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>編集ページ</title>
+  <title>登録情報編集</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
+      background-color: #f8f8f8;
       margin: 0;
       padding: 20px;
     }
     .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background: #fff;
+      max-width: 500px;
+      margin: 40px auto;
+      background-color: #fff;
       padding: 20px;
-      border-radius: 6px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
@@ -25,54 +25,70 @@
     input, textarea, select {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
+      margin: 8px 0;
       border-radius: 4px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
-    button {
-      padding: 10px 20px;
-      margin: 10px 5px 0 0;
-      border: none;
-      border-radius: 4px;
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .btn-main {
       background-color: #007bff;
       color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
       cursor: pointer;
     }
-    button:hover {
+    .btn-main:hover {
       background-color: #0056b3;
     }
-    .danger {
+    .btn-danger {
       background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
     }
-    .danger:hover {
-      background-color: #b02a37;
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+    .btn-cancel {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-cancel:hover {
+      background-color: #5a6268;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>登録情報の編集</h2>
+    <h2>登録情報編集</h2>
+    <input type="text" id="numberInput" placeholder="番号">
+    <input type="text" id="nameInput" placeholder="名前">
+    <select id="admissionYearSelect"></select>
+    <textarea id="memoInput" placeholder="メモ"></textarea>
 
-    <label>番号（変更不可）</label>
-    <input type="text" id="number" disabled />
-
-    <label>名前</label>
-    <input type="text" id="name" />
-
-    <label>入学年度（西暦）</label>
-    <select id="admissionYear"></select>
-
-    <label>メモ</label>
-    <textarea id="memo"></textarea>
-
-    <button onclick="saveChanges()">変更を保存</button>
-    <button class="danger" onclick="confirmDelete()">削除</button>
-    <button onclick="cancel()">キャンセル</button>
+    <div class="button-group">
+      <button class="btn-main" onclick="saveEntry()">保存</button>
+      <button class="btn-danger" onclick="deleteEntry()">削除</button>
+      <button class="btn-cancel" onclick="cancelEdit()">キャンセル</button>
+    </div>
   </div>
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const number = urlParams.get('number');
+    const originalNumber = urlParams.get('number');
 
     document.addEventListener("DOMContentLoaded", () => {
       loadYears();
@@ -80,42 +96,59 @@
     });
 
     function loadYears() {
-      const yearSelect = document.getElementById("admissionYear");
-      const thisYear = new Date().getFullYear();
-      for (let y = thisYear; y >= 2000; y--) {
+      const select = document.getElementById("admissionYearSelect");
+      const year = new Date().getFullYear();
+      for (let y = year; y >= 2000; y--) {
         const opt = document.createElement("option");
         opt.value = y;
         opt.textContent = y;
-        yearSelect.appendChild(opt);
+        select.appendChild(opt);
       }
     }
 
     async function loadEntry() {
       try {
-        const res = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
+        const res = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${originalNumber}`);
         const data = await res.json();
-        const entry = data[0];
-
-        document.getElementById("number").value = entry.number;
-        document.getElementById("name").value = entry.name || '';
-        document.getElementById("admissionYear").value = entry.admissionYear || '';
-        document.getElementById("memo").value = entry.memo || '';
+        if (data.length > 0) {
+          const entry = data[0];
+          document.getElementById("numberInput").value = entry.number;
+          document.getElementById("nameInput").value = entry.name;
+          document.getElementById("admissionYearSelect").value = entry.admissionYear || "";
+          document.getElementById("memoInput").value = entry.memo || "";
+        } else {
+          alert("データが見つかりませんでした");
+        }
       } catch (e) {
-        console.error("読み込みエラー:", e);
-        alert("データの読み込みに失敗しました。");
+        console.error("読み込み失敗:", e);
+        alert("読み込みに失敗しました");
       }
     }
 
-    async function saveChanges() {
+    async function saveEntry() {
+      const number = document.getElementById("numberInput").value;
+      const name = document.getElementById("nameInput").value;
+      const admissionYear = document.getElementById("admissionYearSelect").value;
+      const memo = document.getElementById("memoInput").value;
+
       const updated = {
-        number: document.getElementById("number").value,
-        name: document.getElementById("name").value,
-        admissionYear: document.getElementById("admissionYear").value,
-        memo: document.getElementById("memo").value,
+        number,
+        name,
+        admissionYear,
+        memo,
         timestamp: new Date().toLocaleString()
       };
 
+      // 削除 → 新規追加（番号が変更される可能性があるため）
       try {
+        if (number !== originalNumber) {
+          await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ number: originalNumber })
+          });
+        }
+
         const res = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -123,40 +156,40 @@
         });
 
         if (res.ok) {
-          alert("変更を保存しました。");
+          alert("変更内容を保存しました");
           window.location.href = "admin.html";
         } else {
-          alert("変更の保存に失敗しました。");
+          alert("保存に失敗しました");
         }
       } catch (e) {
         console.error("保存エラー:", e);
-        alert("通信エラーが発生しました。");
+        alert("保存に失敗しました");
       }
     }
 
-    async function confirmDelete() {
-      if (!confirm("この登録を削除してもよろしいですか？")) return;
+    async function deleteEntry() {
+      if (!confirm("本当に削除しますか？")) return;
 
       try {
         const res = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ number })
+          body: JSON.stringify({ number: originalNumber })
         });
 
         if (res.ok) {
-          alert("削除しました。");
+          alert("削除しました");
           window.location.href = "admin.html";
         } else {
-          alert("削除に失敗しました。");
+          alert("削除に失敗しました");
         }
       } catch (e) {
         console.error("削除エラー:", e);
-        alert("通信エラーが発生しました。");
+        alert("削除に失敗しました");
       }
     }
 
-    function cancel() {
+    function cancelEdit() {
       window.location.href = "admin.html";
     }
   </script>
