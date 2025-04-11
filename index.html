@@ -1,4 +1,24 @@
 <!DOCTYPE html>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+
+  if (code) {
+    // ログイン後に戻ってきたとき：認可コードを保存
+    sessionStorage.setItem('auth_code', code);
+  } else {
+    const storedCode = sessionStorage.getItem('auth_code');
+    if (!storedCode) {
+      // 未ログイン：Hosted UI にリダイレクト
+      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+        '?client_id=67qjddtattdr5i1871723tbtnt' +
+        '&response_type=code' +
+        '&scope=email+openid' +
+        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Findex.html';
+      window.location.href = loginUrl;
+    }
+  }
+</script>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -125,26 +145,6 @@
         </div>
     </div>
     <script>
-        const params = new URLSearchParams(window.location.search);
-            const code = params.get('code');
-            
-            if (code) {
-            // ログイン後のリダイレクト時に認可コードが含まれていればログイン済みとみなす（開発中でトークン処理をしていない簡易版）
-            sessionStorage.setItem('auth_code', code);
-            } else {
-            // セッションにもコードがない＝未ログインと判定
-            const storedCode = sessionStorage.getItem('auth_code');
-            if (!storedCode) {
-            // 未ログイン：Hosted UI へリダイレクト
-            const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
-            '?client_id=67qjddtattdr5i1871723tbtnt' +
-            '&response_type=code' +
-            '&scope=email+openid' +
-            '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Findex.html';
-            window.location.href = loginUrl;
-            }
-        }
-        
         let sortDirection = true;
     
         document.addEventListener("DOMContentLoaded", loadEntries);
