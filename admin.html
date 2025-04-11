@@ -148,7 +148,7 @@
             let entry = { number, name, memo, timestamp };
     
             try {
-                let response = await fetch('https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries', {
+                let response = await fetch('https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(entry)
@@ -167,7 +167,7 @@
     
         async function loadEntries() {
             try {
-                let response = await fetch('https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries');
+                let response = await fetch('https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries');
                 let entries = await response.json();
                 window.entries = entries;
                 renderEntries(entries);
