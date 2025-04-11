@@ -167,14 +167,25 @@
     
         function sortTable() {
             const key = document.getElementById("sortSelect").value;
+        
             const sorted = [...window.entries].sort((a, b) => {
-                const valA = key === "number" ? parseInt(a[key]) : a[key];
-                const valB = key === "number" ? parseInt(b[key]) : b[key];
-                return sortDirection ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+                let valA = a[key];
+                let valB = b[key];
+        
+                if (key === "number") {
+                    valA = parseInt(valA);
+                    valB = parseInt(valB);
+                    return sortDirection ? valA - valB : valB - valA;
+                } else {
+                    return sortDirection
+                        ? valA.localeCompare(valB, 'ja')
+                        : valB.localeCompare(valA, 'ja');
+                }
             });
+        
             renderEntries(sorted);
         }
-    
+
         function toggleSortDirection() {
             sortDirection = !sortDirection;
             sortTable();
