@@ -9,39 +9,55 @@
       font-family: Arial, sans-serif;
       background-color: #f8f8f8;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
     .container {
       max-width: 700px;
       margin: 40px auto;
-      background-color: #fff;
+      background: #fff;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
       margin-bottom: 20px;
     }
-    input, select, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
-      border: 1px solid #ccc;
       border-radius: 4px;
+      border: 1px solid #ccc;
       box-sizing: border-box;
     }
-    button {
-      padding: 10px 16px;
-      margin: 8px 4px 0 0;
-      background-color: #4CAF50;
+    .button-group {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .btn-main {
+      padding: 10px 20px;
+      margin: 8px;
+      background-color: #007bff;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #45a049;
+    .btn-main:hover {
+      background-color: #0056b3;
+    }
+    .sort-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    .sort-btn:hover {
+      background-color: #218838;
     }
     table {
       width: 100%;
@@ -50,44 +66,49 @@
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
       text-align: left;
     }
     th {
-      background-color: #eee;
+      background-color: #f0f0f0;
     }
-    .sort-btn {
+    .edit-btn {
       background-color: #007bff;
       color: white;
+      padding: 5px 10px;
       border: none;
-      padding: 6px 12px;
-      margin-left: 10px;
+      border-radius: 4px;
       cursor: pointer;
+    }
+    .edit-btn:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>管理者ページ</h2>
-    <button onclick="location.href='index.html'">一般ページへ</button>
-    
+    <div class="button-group">
+      <button class="btn-main" onclick="location.href='index.html'">一般ページへ</button>
+    </div>
+
     <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999">
     <input type="text" id="nameInput" placeholder="名前">
-    <select id="yearSelect">
-      <option value="">入学年度を選択</option>
-    </select>
+    <select id="admissionYearSelect"></select>
     <textarea id="memoInput" placeholder="メモ"></textarea>
 
-    
-    <button onclick="addEntry()">登録番号の追加</button>
+    <div class="button-group">
+      <button class="btn-main" onclick="addEntry()">登録番号の追加</button>
+    </div>
 
     <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
-    <select id="sortSelect" onchange="sortTable()">
-      <option value="number">番号でソート</option>
-      <option value="timestamp">追加日時でソート</option>
-      <option value="admissionYear">入学年度でソート</option>
-    </select>
-    <button class="sort-btn" onclick="toggleSortDirection()">ソート順変更</button>
+    <div style="margin-top: 10px;">
+      <select id="sortSelect" onchange="sortTable()">
+        <option value="number">番号でソート</option>
+        <option value="timestamp">追加日時でソート</option>
+      </select>
+      <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
+    </div>
 
     <table>
       <thead>
@@ -105,38 +126,50 @@
   </div>
 
   <script>
-    // 入学年度生成
-    const yearSelect = document.getElementById("yearSelect");
-    const currentYear = new Date().getFullYear();
-    for (let y = 2015; y <= 2030; y++) {
-      const option = document.createElement("option");
-      option.value = y;
-      option.textContent = y;
-      yearSelect.appendChild(option);
-    }
-
     let sortDirection = true;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadYears();
+      loadEntries();
+    });
+
+    function loadYears() {
+      const select = document.getElementById("admissionYearSelect");
+      const year = new Date().getFullYear();
+      for (let y = year; y >= 2000; y--) {
+        const opt = document.createElement("option");
+        opt.value = y;
+        opt.textContent = y;
+        select.appendChild(opt);
+      }
+    }
 
     async function addEntry() {
       const number = document.getElementById("numberInput").value;
       const name = document.getElementById("nameInput").value;
-      const admissionYear = document.getElementById("yearSelect").value;
+      const admissionYear = document.getElementById("admissionYearSelect").value;
       const memo = document.getElementById("memoInput").value;
       const timestamp = new Date().toLocaleString();
 
-      if (!number || !name || !admissionYear) {
-        alert("番号、名前、入学年度は必須です。");
+      if (number.length !== 3 || !name || !admissionYear) {
+        alert("番号・名前・入学年度は必須です。");
         return;
       }
 
-      const checkRes = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
-      const existing = await checkRes.json();
-      if (existing.length > 0) {
-        alert("この番号はすでに登録されています");
+      try {
+        const check = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
+        const exists = await check.json();
+        if (exists.length > 0) {
+          alert("この番号はすでに登録されています。");
+          return;
+        }
+      } catch (e) {
+        console.error("重複チェック失敗:", e);
+        alert("登録前のチェックに失敗しました。");
         return;
       }
 
-      const entry = { number, name, memo, timestamp, admissionYear };
+      const entry = { number, name, admissionYear, memo, timestamp };
 
       try {
         const res = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
@@ -145,18 +178,17 @@
           body: JSON.stringify(entry)
         });
         if (res.ok) {
-          alert("登録しました");
+          alert("登録しました。");
           document.getElementById("numberInput").value = "";
           document.getElementById("nameInput").value = "";
           document.getElementById("memoInput").value = "";
-          document.getElementById("yearSelect").value = "";
           loadEntries();
         } else {
-          alert("登録に失敗しました");
+          alert("登録に失敗しました。");
         }
       } catch (e) {
-        console.error("追加エラー:", e);
-        alert("通信エラーが発生しました");
+        console.error("登録エラー:", e);
+        alert("登録に失敗しました。");
       }
     }
 
@@ -166,8 +198,9 @@
         const data = await res.json();
         window.entries = data;
         renderEntries(data);
-      } catch (err) {
-        console.error("読み込み失敗:", err);
+      } catch (e) {
+        console.error("読み込み失敗:", e);
+        alert("エントリの読み込みに失敗しました。");
       }
     }
 
@@ -179,17 +212,17 @@
         tr.innerHTML = `
           <td>${entry.number}</td>
           <td>${entry.name}</td>
-          <td>${entry.admissionYear || ""}</td>
+          <td>${entry.admissionYear || ''}</td>
           <td>${entry.memo}</td>
           <td>${entry.timestamp}</td>
-          <td><button onclick="editEntry('${entry.number}')">編集</button></td>
+          <td><button class="edit-btn" onclick="editEntry('${entry.number}')">編集</button></td>
         `;
         list.appendChild(tr);
       });
     }
 
     function editEntry(number) {
-      location.href = `edit.html?number=${number}`;
+      window.location.href = `edit.html?number=${number}`;
     }
 
     function searchEntries() {
@@ -203,11 +236,15 @@
     function sortTable() {
       const key = document.getElementById("sortSelect").value;
       const sorted = [...window.entries].sort((a, b) => {
-        let valA = a[key] || "";
-        let valB = b[key] || "";
-        return sortDirection
-          ? valA.localeCompare(valB, 'ja', { numeric: true })
-          : valB.localeCompare(valA, 'ja', { numeric: true });
+        let aVal = a[key];
+        let bVal = b[key];
+        if (key === "number") {
+          return sortDirection ? aVal - bVal : bVal - aVal;
+        } else {
+          return sortDirection
+            ? aVal.localeCompare(bVal, 'ja')
+            : bVal.localeCompare(aVal, 'ja');
+        }
       });
       renderEntries(sorted);
     }
@@ -216,8 +253,6 @@
       sortDirection = !sortDirection;
       sortTable();
     }
-
-    document.addEventListener("DOMContentLoaded", loadEntries);
   </script>
 </body>
 </html>
