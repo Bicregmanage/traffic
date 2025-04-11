@@ -93,41 +93,53 @@
 </head>
 <body>
   <script>
-    async function checkAdminAccess() {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const idToken = params.get('id_token') || sessionStorage.getItem('id_token');
+  async function checkAdminAccess() {
+    console.log("🟢 管理者チェック開始");
 
-      if (!idToken) {
-        const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
-          '?client_id=67qjddtattdr5i1871723tbtnt' +
-          '&response_type=token' +
-          '&scope=email+openid' +
-          '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
-        window.location.href = loginUrl;
-        return;
-      }
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const idToken = params.get('id_token') || sessionStorage.getItem('id_token');
 
-      sessionStorage.setItem('id_token', idToken);
+    console.log("✅ IDトークン：", idToken ? idToken.slice(0, 30) + "..." : "なし");
 
-      try {
-        const { decodeJwt } = jose;
-        const payload = decodeJwt(idToken);
-        const groups = payload['cognito:groups'] || [];
-
-        if (!groups.includes('admin')) {
-          alert('このページにはアクセスできません（管理者専用）');
-          window.location.href = '/traffic/index.html';
-        }
-      } catch (e) {
-        alert('認証情報の解析に失敗しました。ログインし直してください。');
-        sessionStorage.clear();
-        window.location.href = '/traffic/index.html';
-      }
+    if (!idToken) {
+      console.warn("⚠️ IDトークンが見つかりません。Hosted UIへリダイレクトします");
+      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+        '?client_id=67qjddtattdr5i1871723tbtnt' +
+        '&response_type=token' +
+        '&scope=email+openid' +
+        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
+      window.location.href = loginUrl;
+      return;
     }
 
-    checkAdminAccess();
-  </script>
+    sessionStorage.setItem('id_token', idToken);
+
+    try {
+      const { decodeJwt } = jose;
+      const payload = decodeJwt(idToken);
+      console.log("🧾 デコード結果:", payload);
+
+      const groups = payload['cognito:groups'] || [];
+      console.log("👥 所属グループ:", groups);
+
+      if (!groups.includes('admin')) {
+        console.warn("🚫 adminグループに属していません。indexに移動します。");
+        alert('このページにはアクセスできません（管理者専用）');
+        window.location.href = '/traffic/index.html';
+      } else {
+        console.log("✅ adminグループ確認済み。ページ表示OK");
+      }
+    } catch (e) {
+      console.error("❌ トークンのデコード失敗:", e);
+      alert('認証情報の解析に失敗しました。ログインし直してください。');
+      sessionStorage.clear();
+      window.location.href = '/traffic/index.html';
+    }
+  }
+
+  checkAdminAccess();
+</script>
 
   <div class="container">
     <h2>管理者ページ</h2>
