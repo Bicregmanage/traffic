@@ -125,6 +125,27 @@
         </div>
     </div>
     <script>
+        const params = new URLSearchParams(window.location.hash.substring(1));
+          const idToken = params.get('id_token');
+        
+          if (idToken) {
+            // 認証済み：トークンをセッションストレージに保存（次回以降のページ移動でも保持できるように）
+            sessionStorage.setItem('id_token', idToken);
+          } else {
+            // 前回のセッションから取得
+            const storedToken = sessionStorage.getItem('id_token');
+            if (!storedToken) {
+              // トークンが全くない → ログインへリダイレクト
+              const loginUrl = 'https://bicreg-login.auth.us-east-1.amazoncognito.com/login' +
+                '?client_id=2o6lqmrk4qeaelvbm4avvr8cl4' +
+                '&response_type=token' +
+                '&scope=openid+email+profile' +
+                '&redirect_uri=https://bicregmanage.github.io/traffic/index.html';
+        
+              window.location.href = loginUrl;
+            }
+          }
+        
         let sortDirection = true;
     
         document.addEventListener("DOMContentLoaded", loadEntries);
