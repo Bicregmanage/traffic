@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- jose ライブラリ（JWTデコード用） -->
 <script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
 
 <script>
@@ -13,23 +14,22 @@
         '?client_id=67qjddtattdr5i1871723tbtnt' +
         '&response_type=token' +
         '&scope=email+openid' +
-        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Fadmin.html';
+        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
       window.location.href = loginUrl;
       return;
     }
 
-    // トークンをセッション保存（以降のページ遷移で再利用）
+    // セッション保存
     sessionStorage.setItem('id_token', idToken);
 
     // JWTデコード
     const { decodeJwt } = jose;
     const payload = decodeJwt(idToken);
 
-    // adminグループチェック
     const groups = payload['cognito:groups'] || [];
     if (!groups.includes('admin')) {
       alert('このページにはアクセスできません（管理者専用）');
-      window.location.href = 'index.html';
+      window.location.href = '/traffic/index.html';
     }
   }
 
