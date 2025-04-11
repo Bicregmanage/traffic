@@ -73,7 +73,7 @@
     
         async function fetchEntry(number) {
             try {
-                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
+                let response = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
                 let entries = await response.json();
                 const entry = entries.find(e => e.number === number);
     
@@ -96,7 +96,7 @@
             const timestamp = new Date().toLocaleString();
     
             try {
-                const response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries`, {
+                const response = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ number, name, memo, timestamp })
@@ -118,7 +118,7 @@
             if (!confirm("本当に削除しますか？")) return;
     
             try {
-                const response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries`, {
+                const response = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries`, {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ number })
