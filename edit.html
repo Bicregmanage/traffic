@@ -56,9 +56,9 @@
         <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999">
         <input type="text" id="nameInput" placeholder="名前">
         <textarea id="memoInput" placeholder="メモ"></textarea>
-        <button onclick="saveEntry()">保存</button>
+        <button onclick="saveChanges()">保存</button>
         <button onclick="cancel()">キャンセル</button>
-        <button class="delete-btn" onclick="confirmDelete()">削除</button>
+        <button class="delete-btn" onclick="deleteEntry()">削除</button>
     </div>
     <script>
         let number;
