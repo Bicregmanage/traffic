@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>管理者ページ</title>
-  <script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -19,8 +18,7 @@
       background-color: #fff;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      box-sizing: border-box;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
@@ -32,7 +30,6 @@
       margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 4px;
-      box-sizing: border-box;
     }
     button {
       padding: 10px 16px;
@@ -57,7 +54,6 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      border: 2px solid #666;
     }
     th, td {
       border: 1px solid #ccc;
@@ -73,21 +69,9 @@
       border: none;
       padding: 5px;
       cursor: pointer;
-      margin-left: 5px;
     }
     .edit-btn:hover {
       background-color: #0056b3;
-    }
-    .sort-btn {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-    .sort-btn:hover {
-      background-color: #218838;
     }
   </style>
 </head>
@@ -95,18 +79,11 @@
   <div class="container">
     <h2>管理者ページ</h2>
     <button onclick="location.href='index.html'">一般ページへ</button>
-    <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999" />
+    <input type="number" id="numberInput" placeholder="3桁の番号" />
     <input type="text" id="nameInput" placeholder="名前" />
     <textarea id="memoInput" placeholder="メモ"></textarea>
     <button onclick="addEntry()">登録番号の追加</button>
     <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()" />
-    <div>
-      <select id="sortSelect" onchange="sortTable()">
-        <option value="number">番号でソート</option>
-        <option value="timestamp">追加日時でソート</option>
-      </select>
-      <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
-    </div>
     <div class="table-container">
       <table>
         <thead>
@@ -124,51 +101,9 @@
   </div>
 
   <script>
-    window.addEventListener("DOMContentLoaded", async () => {
-      console.log("✅ DOM loaded, checkAdminAccess 実行");
-
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const idToken = params.get("id_token") || sessionStorage.getItem("id_token");
-
-      console.log("🟢 IDトークン確認:", idToken ? idToken.slice(0, 30) + "..." : "なし");
-
-      if (!idToken) {
-        console.warn("⚠️ トークンなし → Hosted UIへリダイレクト");
-        const loginUrl = "https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login" +
-          "?client_id=67qjddtattdr5i1871723tbtnt" +
-          "&response_type=token" +
-          "&scope=email+openid" +
-          "&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html";
-        window.location.href = loginUrl;
-        return;
-      }
-
-      sessionStorage.setItem("id_token", idToken);
-
-      try {
-        const { decodeJwt } = jose;
-        const payload = decodeJwt(idToken);
-        console.log("🧾 トークン内容:", payload);
-
-        const groups = payload["cognito:groups"] || [];
-        console.log("👥 グループ:", groups);
-
-        if (!groups.includes("admin")) {
-          alert("このページにはアクセスできません（管理者専用）");
-          window.location.href = "/traffic/index.html";
-        } else {
-          console.log("✅ adminグループ確認済み");
-        }
-      } catch (e) {
-        console.error("❌ トークン解析エラー:", e);
-        alert("認証情報の取得に失敗しました。再ログインしてください。");
-        sessionStorage.clear();
-        window.location.href = "/traffic/index.html";
-      }
-    });
-
     let sortDirection = true;
+
+    document.addEventListener("DOMContentLoaded", loadEntries);
 
     async function addEntry() {
       const number = document.getElementById("numberInput").value;
@@ -189,8 +124,7 @@
           return;
         }
       } catch (error) {
-        console.error("登録チェックに失敗:", error);
-        alert("登録チェックに失敗しました");
+        alert("チェックに失敗しました");
         return;
       }
 
@@ -213,7 +147,6 @@
           alert("登録に失敗しました");
         }
       } catch (error) {
-        console.error("登録エラー:", error);
         alert("登録に失敗しました");
       }
     }
@@ -225,8 +158,7 @@
         window.entries = entries;
         renderEntries(entries);
       } catch (error) {
-        console.error("読み込みエラー:", error);
-        alert("エントリの読み込みに失敗しました");
+        alert("読み込みに失敗しました");
       }
     }
 
@@ -257,31 +189,6 @@
       );
       renderEntries(filtered);
     }
-
-    function sortTable() {
-      const key = document.getElementById("sortSelect").value;
-      const sorted = [...window.entries].sort((a, b) => {
-        let valA = a[key];
-        let valB = b[key];
-        if (key === "number") {
-          valA = parseInt(valA);
-          valB = parseInt(valB);
-          return sortDirection ? valA - valB : valB - valA;
-        } else {
-          return sortDirection
-            ? valA.localeCompare(valB, 'ja')
-            : valB.localeCompare(valA, 'ja');
-        }
-      });
-      renderEntries(sorted);
-    }
-
-    function toggleSortDirection() {
-      sortDirection = !sortDirection;
-      sortTable();
-    }
-
-    document.addEventListener("DOMContentLoaded", loadEntries);
   </script>
 </body>
 </html>
