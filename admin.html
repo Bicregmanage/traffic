@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>管理者ページ</title>
   <script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
   <style>
@@ -19,7 +19,7 @@
       background-color: #fff;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
       box-sizing: border-box;
     }
     h2 {
@@ -67,12 +67,12 @@
     th {
       background-color: #f0f0f0;
     }
-    .edit-btn { 
-      background-color: #007bff; 
-      color: white; 
-      border: none; 
-      padding: 5px; 
-      cursor: pointer; 
+    .edit-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
       margin-left: 5px;
     }
     .edit-btn:hover {
@@ -92,63 +92,14 @@
   </style>
 </head>
 <body>
-  <script>
-  async function checkAdminAccess() {
-    console.log("🟢 管理者チェック開始");
-
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const idToken = params.get('id_token') || sessionStorage.getItem('id_token');
-
-    console.log("✅ IDトークン：", idToken ? idToken.slice(0, 30) + "..." : "なし");
-
-    if (!idToken) {
-      console.warn("⚠️ IDトークンが見つかりません。Hosted UIへリダイレクトします");
-      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
-        '?client_id=67qjddtattdr5i1871723tbtnt' +
-        '&response_type=token' +
-        '&scope=email+openid' +
-        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
-      window.location.href = loginUrl;
-      return;
-    }
-
-    sessionStorage.setItem('id_token', idToken);
-
-    try {
-      const { decodeJwt } = jose;
-      const payload = decodeJwt(idToken);
-      console.log("🧾 デコード結果:", payload);
-
-      const groups = payload['cognito:groups'] || [];
-      console.log("👥 所属グループ:", groups);
-
-      if (!groups.includes('admin')) {
-        console.warn("🚫 adminグループに属していません。indexに移動します。");
-        alert('このページにはアクセスできません（管理者専用）');
-        window.location.href = '/traffic/index.html';
-      } else {
-        console.log("✅ adminグループ確認済み。ページ表示OK");
-      }
-    } catch (e) {
-      console.error("❌ トークンのデコード失敗:", e);
-      alert('認証情報の解析に失敗しました。ログインし直してください。');
-      sessionStorage.clear();
-      window.location.href = '/traffic/index.html';
-    }
-  }
-
-  checkAdminAccess();
-</script>
-
   <div class="container">
     <h2>管理者ページ</h2>
     <button onclick="location.href='index.html'">一般ページへ</button>
-    <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999">
-    <input type="text" id="nameInput" placeholder="名前">
+    <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999" />
+    <input type="text" id="nameInput" placeholder="名前" />
     <textarea id="memoInput" placeholder="メモ"></textarea>
     <button onclick="addEntry()">登録番号の追加</button>
-    <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
+    <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()" />
     <div>
       <select id="sortSelect" onchange="sortTable()">
         <option value="number">番号でソート</option>
@@ -173,9 +124,51 @@
   </div>
 
   <script>
-    let sortDirection = true;
+    window.addEventListener("DOMContentLoaded", async () => {
+      console.log("✅ DOM loaded, checkAdminAccess 実行");
 
-    document.addEventListener("DOMContentLoaded", loadEntries);
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const idToken = params.get("id_token") || sessionStorage.getItem("id_token");
+
+      console.log("🟢 IDトークン確認:", idToken ? idToken.slice(0, 30) + "..." : "なし");
+
+      if (!idToken) {
+        console.warn("⚠️ トークンなし → Hosted UIへリダイレクト");
+        const loginUrl = "https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login" +
+          "?client_id=67qjddtattdr5i1871723tbtnt" +
+          "&response_type=token" +
+          "&scope=email+openid" +
+          "&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html";
+        window.location.href = loginUrl;
+        return;
+      }
+
+      sessionStorage.setItem("id_token", idToken);
+
+      try {
+        const { decodeJwt } = jose;
+        const payload = decodeJwt(idToken);
+        console.log("🧾 トークン内容:", payload);
+
+        const groups = payload["cognito:groups"] || [];
+        console.log("👥 グループ:", groups);
+
+        if (!groups.includes("admin")) {
+          alert("このページにはアクセスできません（管理者専用）");
+          window.location.href = "/traffic/index.html";
+        } else {
+          console.log("✅ adminグループ確認済み");
+        }
+      } catch (e) {
+        console.error("❌ トークン解析エラー:", e);
+        alert("認証情報の取得に失敗しました。再ログインしてください。");
+        sessionStorage.clear();
+        window.location.href = "/traffic/index.html";
+      }
+    });
+
+    let sortDirection = true;
 
     async function addEntry() {
       const number = document.getElementById("numberInput").value;
@@ -227,13 +220,13 @@
 
     async function loadEntries() {
       try {
-        const response = await fetch('https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries');
+        const response = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries");
         const entries = await response.json();
         window.entries = entries;
         renderEntries(entries);
       } catch (error) {
-        console.error('Error:', error);
-        alert('エントリの読み込みに失敗しました');
+        console.error("読み込みエラー:", error);
+        alert("エントリの読み込みに失敗しました");
       }
     }
 
@@ -270,7 +263,6 @@
       const sorted = [...window.entries].sort((a, b) => {
         let valA = a[key];
         let valB = b[key];
-
         if (key === "number") {
           valA = parseInt(valA);
           valB = parseInt(valB);
@@ -281,7 +273,6 @@
             : valB.localeCompare(valA, 'ja');
         }
       });
-
       renderEntries(sorted);
     }
 
@@ -289,6 +280,8 @@
       sortDirection = !sortDirection;
       sortTable();
     }
+
+    document.addEventListener("DOMContentLoaded", loadEntries);
   </script>
 </body>
 </html>
