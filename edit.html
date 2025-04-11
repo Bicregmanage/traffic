@@ -52,18 +52,18 @@
 <body>
   <div class="container">
     <h2>登録情報の編集</h2>
-    
+
     <label>番号（変更不可）</label>
     <input type="text" id="number" disabled />
 
     <label>名前</label>
     <input type="text" id="name" />
 
-    <label>メモ</label>
-    <textarea id="memo"></textarea>
-
     <label>入学年度（西暦）</label>
     <select id="admissionYear"></select>
+
+    <label>メモ</label>
+    <textarea id="memo"></textarea>
 
     <button onclick="saveChanges()">変更を保存</button>
     <button class="danger" onclick="confirmDelete()">削除</button>
@@ -98,8 +98,8 @@
 
         document.getElementById("number").value = entry.number;
         document.getElementById("name").value = entry.name || '';
-        document.getElementById("memo").value = entry.memo || '';
         document.getElementById("admissionYear").value = entry.admissionYear || '';
+        document.getElementById("memo").value = entry.memo || '';
       } catch (e) {
         console.error("読み込みエラー:", e);
         alert("データの読み込みに失敗しました。");
@@ -110,8 +110,8 @@
       const updated = {
         number: document.getElementById("number").value,
         name: document.getElementById("name").value,
-        memo: document.getElementById("memo").value,
         admissionYear: document.getElementById("admissionYear").value,
+        memo: document.getElementById("memo").value,
         timestamp: new Date().toLocaleString()
       };
 
