@@ -11,105 +11,73 @@
       margin: 0;
       padding: 0;
     }
-
     .container {
       max-width: 700px;
-      width: 90%;
       margin: 40px auto;
       background-color: #fff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-      text-align: center;
     }
-
     h2 {
+      text-align: center;
       margin-bottom: 20px;
     }
-
-    .center-button {
+    .button-row {
       display: flex;
       justify-content: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
-
-    button {
+    .button-row button {
       padding: 10px 20px;
-      margin: 8px;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
-
-    button:hover {
+    .button-row button:hover {
       background-color: #0056b3;
     }
-
     input, select {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
+      margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
     }
-
-    .sort-controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-
     .sort-btn {
       background-color: #28a745;
       color: white;
       border: none;
       padding: 5px 10px;
-      border-radius: 4px;
       cursor: pointer;
+      margin-top: 10px;
     }
-
     .sort-btn:hover {
       background-color: #218838;
     }
-
     .table-container {
-      margin-top: 30px;
-      overflow-x: auto;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
       border: 1px solid #aaa;
       border-radius: 6px;
       padding: 10px;
       background-color: #fafafa;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      border: 2px solid #666;
     }
-
     th, td {
       border: 1px solid #ccc;
       padding: 10px;
       text-align: left;
     }
-
     th {
       background-color: #f0f0f0;
-    }
-
-    @media (max-width: 600px) {
-      .sort-controls {
-        flex-direction: column;
-      }
-      button {
-        width: 100%;
-      }
     }
   </style>
 </head>
@@ -117,17 +85,17 @@
   <div class="container">
     <h2>登録番号検索システム</h2>
 
-    <div class="center-button">
+    <div class="button-row">
       <button onclick="location.href='admin.html'">管理者ページへ</button>
     </div>
 
-    <input type="text" id="searchInput" placeholder="検索 (番号・名前・入学年度)" oninput="searchEntries()">
+    <input type="text" id="searchInput" placeholder="検索（番号・名前・入学年度）" oninput="searchEntries()">
 
-    <div class="sort-controls">
+    <div>
       <select id="sortSelect" onchange="sortTable()">
         <option value="number">番号でソート</option>
-        <option value="timestamp">追加日時でソート</option>
         <option value="admissionYear">入学年度でソート</option>
+        <option value="timestamp">追加日時でソート</option>
       </select>
       <button class="sort-btn" onclick="toggleSortDirection()">ソート順変更</button>
     </div>
@@ -174,19 +142,24 @@
           <td>${entry.number}</td>
           <td>${entry.name}</td>
           <td>${entry.admissionYear || ""}</td>
-          <td>${entry.memo || ""}</td>
-          <td>${convertToJST(entry.timestamp)}</td>
+          <td>${entry.memo}</td>
+          <td>${formatToLocalTime(entry.timestamp)}</td>
         `;
         entryList.appendChild(tr);
       });
+    }
+
+    function formatToLocalTime(utc) {
+      const date = new Date(utc);
+      return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
     }
 
     function searchEntries() {
       const keyword = document.getElementById("searchInput").value.toLowerCase();
       const filtered = window.entries.filter(entry =>
         entry.number.includes(keyword) ||
-        (entry.name && entry.name.toLowerCase().includes(keyword)) ||
-        (entry.admissionYear && entry.admissionYear.toString().includes(keyword))
+        (entry.name || "").toLowerCase().includes(keyword) ||
+        (entry.admissionYear || "").includes(keyword)
       );
       renderEntries(filtered);
     }
@@ -206,16 +179,6 @@
     function toggleSortDirection() {
       sortDirection = !sortDirection;
       sortTable();
-    }
-
-    function convertToJST(utcString) {
-      if (!utcString) return "";
-      const date = new Date(utcString);
-      return new Intl.DateTimeFormat('ja-JP', {
-        dateStyle: 'short',
-        timeStyle: 'short',
-        timeZone: 'Asia/Tokyo'
-      }).format(date);
     }
   </script>
 </body>
