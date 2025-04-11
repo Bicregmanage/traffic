@@ -82,8 +82,8 @@
     <div>
       <select id="sortSelect" onchange="sortTable()">
         <option value="number">番号でソート</option>
-        <option value="timestamp">追加日時でソート</option>
         <option value="admissionYear">入学年度でソート</option>
+        <option value="timestamp">追加日時でソート</option>
       </select>
       <button class="sort-btn" onclick="toggleSortDirection()">ソート順変更</button>
     </div>
@@ -131,7 +131,7 @@
           <td>${entry.name}</td>
           <td>${entry.admissionYear || ""}</td>
           <td>${entry.memo}</td>
-          <td>${entry.timestamp}</td>
+          <td>${new Date(entry.timestamp).toLocaleString('ja-JP')}</td>
         `;
         entryList.appendChild(tr);
       });
