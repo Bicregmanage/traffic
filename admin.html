@@ -1,330 +1,282 @@
 <!DOCTYPE html>
-<!-- jose ライブラリ（JWTデコード用） -->
-<script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
-
-<script>
-  async function checkAdminAccess() {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const idToken = params.get('id_token') || sessionStorage.getItem('id_token');
-
-    if (!idToken) {
-      // トークンがない → Hosted UI にリダイレクト
-      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
-        '?client_id=67qjddtattdr5i1871723tbtnt' +
-        '&response_type=token' +
-        '&scope=email+openid' +
-        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
-      window.location.href = loginUrl;
-      return;
-    }
-
-    // セッション保存
-    sessionStorage.setItem('id_token', idToken);
-
-    // JWTデコード
-    const { decodeJwt } = jose;
-    const payload = decodeJwt(idToken);
-
-    const groups = payload['cognito:groups'] || [];
-    if (!groups.includes('admin')) {
-      alert('このページにはアクセスできません（管理者専用）');
-      window.location.href = '/traffic/index.html';
-    }
-  }
-
-  checkAdminAccess();
-</script>
-
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理者ページ</title>
-    <style>
-        body {
-        font-family: Arial, sans-serif;
-        background-color: #f8f8f8;
-        margin: 0;
-        padding: 0;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理者ページ</title>
+  <script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
     }
-
     .container {
-        max-width: 700px;
-        width: 90%;
-        margin: 40px auto;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 8px rgba(0,0,0,0.1);
-        box-sizing: border-box;
+      max-width: 700px;
+      width: 90%;
+      margin: 40px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      box-sizing: border-box;
     }
-
-    h1 {
-        text-align: center;
-        margin-bottom: 20px;
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
     }
-
     input, textarea {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
     }
-
     button {
-        padding: 10px 16px;
-        margin: 8px 4px 0 0;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
+      padding: 10px 16px;
+      margin: 8px 4px 0 0;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
-
     button:hover {
-        background-color: #45a049;
+      background-color: #45a049;
     }
-
     .table-container {
-        margin-top: 30px;
-        overflow-x: auto;
-        border: 1px solid #aaa;
-        border-radius: 6px;
-        padding: 10px;
-        background-color: #fafafa;
+      margin-top: 30px;
+      overflow-x: auto;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      padding: 10px;
+      background-color: #fafafa;
     }
-
     table {
-        width: 100%;
-        border-collapse: collapse;
-        border: 2px solid #666;
+      width: 100%;
+      border-collapse: collapse;
+      border: 2px solid #666;
     }
-
     th, td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
     }
-
     th {
-        background-color: #f0f0f0;
+      background-color: #f0f0f0;
     }
-
-    @media (max-width: 600px) {
-        button {
-            width: 100%;
-            margin-bottom: 10px;
-        }
+    .edit-btn { 
+      background-color: #007bff; 
+      color: white; 
+      border: none; 
+      padding: 5px; 
+      cursor: pointer; 
+      margin-left: 5px;
     }
-
-        .edit-btn { 
-            background-color: #007bff; 
-            color: white; 
-            border: none; 
-            padding: 5px; 
-            cursor: pointer; 
-            margin-left: 5px; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        .edit-btn:hover { 
-            background-color: #0056b3; 
-        }
-        .sort-btn { 
-            background-color: #28a745; 
-            color: white; 
-            border: none; 
-            padding: 5px 10px; 
-            cursor: pointer; 
-            margin-left: 5px; 
-        }
-        .sort-btn:hover { 
-            background-color: #218838; 
-        }
-        .name-cell, .memo-cell { 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-    </style>
+    .edit-btn:hover {
+      background-color: #0056b3;
+    }
+    .sort-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    .sort-btn:hover {
+      background-color: #218838;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>管理者ページ</h2>
-            <button onclick="location.href='index.html'">一般ページへ</button>
-            <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999">
-            <input type="text" id="nameInput" placeholder="名前">
-            <textarea id="memoInput" placeholder="メモ"></textarea>
-            <button onclick="addEntry()">登録番号の追加</button>
-            
-            <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
-            <div>
-                <select id="sortSelect" onchange="sortTable()">
-                    <option value="number">番号でソート</option>
-                    <option value="timestamp">追加日時でソート</option>
-                </select>
-                <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>番号</th>
-                            <th>名前</th>
-                            <th>メモ</th>
-                            <th>追加日時</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="entryList"></tbody>
-                </table>
-            </div>
-        </div>
+  <script>
+    async function checkAdminAccess() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const idToken = params.get('id_token') || sessionStorage.getItem('id_token');
+
+      if (!idToken) {
+        const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+          '?client_id=67qjddtattdr5i1871723tbtnt' +
+          '&response_type=token' +
+          '&scope=email+openid' +
+          '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
+        window.location.href = loginUrl;
+        return;
+      }
+
+      sessionStorage.setItem('id_token', idToken);
+
+      try {
+        const { decodeJwt } = jose;
+        const payload = decodeJwt(idToken);
+        const groups = payload['cognito:groups'] || [];
+
+        if (!groups.includes('admin')) {
+          alert('このページにはアクセスできません（管理者専用）');
+          window.location.href = '/traffic/index.html';
+        }
+      } catch (e) {
+        alert('認証情報の解析に失敗しました。ログインし直してください。');
+        sessionStorage.clear();
+        window.location.href = '/traffic/index.html';
+      }
+    }
+
+    checkAdminAccess();
+  </script>
+
+  <div class="container">
+    <h2>管理者ページ</h2>
+    <button onclick="location.href='index.html'">一般ページへ</button>
+    <input type="number" id="numberInput" placeholder="3桁の番号" min="100" max="999">
+    <input type="text" id="nameInput" placeholder="名前">
+    <textarea id="memoInput" placeholder="メモ"></textarea>
+    <button onclick="addEntry()">登録番号の追加</button>
+    <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
+    <div>
+      <select id="sortSelect" onchange="sortTable()">
+        <option value="number">番号でソート</option>
+        <option value="timestamp">追加日時でソート</option>
+      </select>
+      <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
     </div>
-    <script>
-	const params = new URLSearchParams(window.location.search);
-		const code = params.get('code');
-		
-		if (code) {
-		// ログイン後のリダイレクト時（認可コードあり）
-		sessionStorage.setItem('auth_code', code);
-		} else {
-		const storedCode = sessionStorage.getItem('auth_code');
-		if (!storedCode) {
-		// 未ログイン → Hosted UI にリダイレクト
-		const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
-		'?client_id=67qjddtattdr5i1871723tbtnt' +
-		'&response_type=code' +
-		'&scope=email+openid' +
-		'&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
-		window.location.href = loginUrl;
-		}
-	}
-        let sortDirection = true;
-    
-        document.addEventListener("DOMContentLoaded", loadEntries);
-    
-        async function addEntry() {
-    			const number = document.getElementById("numberInput").value;
-    			const name = document.getElementById("nameInput").value;
-    			const memo = document.getElementById("memoInput").value;
-    			const timestamp = new Date().toLocaleString();
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>番号</th>
+            <th>名前</th>
+            <th>メモ</th>
+            <th>追加日時</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="entryList"></tbody>
+      </table>
+    </div>
+  </div>
 
-    			if (number.length !== 3 || name.trim() === "") {
-        			alert("3桁の番号と名前を入力してください");
-        			return;
-    			}
+  <script>
+    let sortDirection = true;
 
-    			try {
-        			const check = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
-        			const existing = await check.json();
+    document.addEventListener("DOMContentLoaded", loadEntries);
 
-        			if (existing.length > 0) {
-            			alert("この番号はすでに登録されています");
-            			return;
-        			}
-    			} catch (error) {
-        			console.error("登録チェックに失敗:", error);
-        			alert("登録チェックに失敗しました");
-        			return;
-    			}
+    async function addEntry() {
+      const number = document.getElementById("numberInput").value;
+      const name = document.getElementById("nameInput").value;
+      const memo = document.getElementById("memoInput").value;
+      const timestamp = new Date().toLocaleString();
 
-    			const entry = { number, name, memo, timestamp };
+      if (number.length !== 3 || name.trim() === "") {
+        alert("3桁の番号と名前を入力してください");
+        return;
+      }
 
-    			try {
-        			const response = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
-            			method: "POST",
-            			headers: { "Content-Type": "application/json" },
-            			body: JSON.stringify(entry)
-        			});
-
-        		if (response.ok) {
-            alert("登録しました");
-
-            		document.getElementById("numberInput").value = "";
-            		document.getElementById("nameInput").value = "";
-            		document.getElementById("memoInput").value = "";
-
-            		loadEntries();
-        		} else {
-            		alert("登録に失敗しました");
-        		}
-    		} catch (error) {
-        		console.error("登録エラー:", error);
-        		alert("登録に失敗しました");
-    		}
-	}
-
-    
-        async function loadEntries() {
-            try {
-                let response = await fetch('https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries');
-                let entries = await response.json();
-                window.entries = entries;
-                renderEntries(entries);
-            } catch (error) {
-                console.error('Error:', error);
-                alert('エントリの読み込みに失敗しました');
-            }
+      try {
+        const check = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
+        const existing = await check.json();
+        if (existing.length > 0) {
+          alert("この番号はすでに登録されています");
+          return;
         }
-    
-        function renderEntries(data) {
-            let entryList = document.getElementById("entryList");
-            entryList.innerHTML = "";
-            data.forEach(entry => {
-                let tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${entry.number}</td>
-                    <td class="name-cell">${entry.name}</td>
-                    <td class="memo-cell">${entry.memo}</td>
-                    <td>${entry.timestamp}</td>
-                    <td><button class="edit-btn" onclick="editEntry('${entry.number}')">編集</button></td>
-                `;
-                entryList.appendChild(tr);
-            });
-        }
-    
-        function editEntry(number) {
-            window.location.href = `edit.html?number=${number}`;
-        }
-    
-        function searchEntries() {
-            let keyword = document.getElementById("searchInput").value.toLowerCase();
-            let filtered = window.entries.filter(e =>
-                e.number.includes(keyword) || e.name.toLowerCase().includes(keyword)
-            );
-            renderEntries(filtered);
-        }
-    
-        function sortTable() {
-	    const key = document.getElementById("sortSelect").value;
-	
-	    const sorted = [...window.entries].sort((a, b) => {
-	        let valA = a[key];
-	        let valB = b[key];
-	
-	        if (key === "number") {
-	            valA = parseInt(valA);
-	            valB = parseInt(valB);
-	            return sortDirection ? valA - valB : valB - valA;
-	        } else {
-	            return sortDirection
-	                ? valA.localeCompare(valB, 'ja')
-	                : valB.localeCompare(valA, 'ja');
-	        }
-	    });
-	
-	    renderEntries(sorted);
-	}
+      } catch (error) {
+        console.error("登録チェックに失敗:", error);
+        alert("登録チェックに失敗しました");
+        return;
+      }
 
-        function toggleSortDirection() {
-            sortDirection = !sortDirection;
-            sortTable();
+      const entry = { number, name, memo, timestamp };
+
+      try {
+        const response = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(entry)
+        });
+
+        if (response.ok) {
+          alert("登録しました");
+          document.getElementById("numberInput").value = "";
+          document.getElementById("nameInput").value = "";
+          document.getElementById("memoInput").value = "";
+          loadEntries();
+        } else {
+          alert("登録に失敗しました");
         }
-    </script>    
+      } catch (error) {
+        console.error("登録エラー:", error);
+        alert("登録に失敗しました");
+      }
+    }
+
+    async function loadEntries() {
+      try {
+        const response = await fetch('https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries');
+        const entries = await response.json();
+        window.entries = entries;
+        renderEntries(entries);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('エントリの読み込みに失敗しました');
+      }
+    }
+
+    function renderEntries(data) {
+      const entryList = document.getElementById("entryList");
+      entryList.innerHTML = "";
+      data.forEach(entry => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${entry.number}</td>
+          <td>${entry.name}</td>
+          <td>${entry.memo}</td>
+          <td>${entry.timestamp}</td>
+          <td><button class="edit-btn" onclick="editEntry('${entry.number}')">編集</button></td>
+        `;
+        entryList.appendChild(tr);
+      });
+    }
+
+    function editEntry(number) {
+      window.location.href = `edit.html?number=${number}`;
+    }
+
+    function searchEntries() {
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = window.entries.filter(entry =>
+        entry.number.includes(keyword) || entry.name.toLowerCase().includes(keyword)
+      );
+      renderEntries(filtered);
+    }
+
+    function sortTable() {
+      const key = document.getElementById("sortSelect").value;
+      const sorted = [...window.entries].sort((a, b) => {
+        let valA = a[key];
+        let valB = b[key];
+
+        if (key === "number") {
+          valA = parseInt(valA);
+          valB = parseInt(valB);
+          return sortDirection ? valA - valB : valB - valA;
+        } else {
+          return sortDirection
+            ? valA.localeCompare(valB, 'ja')
+            : valB.localeCompare(valA, 'ja');
+        }
+      });
+
+      renderEntries(sorted);
+    }
+
+    function toggleSortDirection() {
+      sortDirection = !sortDirection;
+      sortTable();
+    }
+  </script>
 </body>
 </html>
