@@ -58,7 +58,7 @@
         <input type="text" id="nameInput" placeholder="名前">
         <textarea id="memoInput" placeholder="メモ"></textarea>
         <button onclick="saveChanges()">保存</button>
-        <button onclick="cancel()">キャンセル</button>
+        <button onclick="cancelEdit()">キャンセル</button>
         <button class="delete-btn" onclick="deleteEntry()">削除</button>
     </div>
     <script>
@@ -72,13 +72,13 @@
                 fetchEntry(number);
             }
         });
-
+    
         async function fetchEntry(number) {
             try {
                 const response = await fetch(`https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
                 const entries = await response.json();
                 const entry = entries.find(e => e.number === number);
-
+    
                 if (entry) {
                     document.getElementById("numberInput").value = entry.number;
                     document.getElementById("nameInput").value = entry.name;
@@ -125,6 +125,34 @@
                 alert("保存に失敗しました");
             }
         }
-    </script>        
+    
+        async function deleteEntry() {
+            const number = document.getElementById("numberInput").value;
+    
+            if (!confirm("このエントリを本当に削除しますか？")) return;
+    
+            try {
+                const response = await fetch("https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ number })
+                });
+    
+                if (response.ok) {
+                    alert("エントリを削除しました");
+                    window.location.href = "admin.html";
+                } else {
+                    alert("削除に失敗しました");
+                }
+            } catch (error) {
+                console.error("削除エラー:", error);
+                alert("削除に失敗しました");
+            }
+        }
+    
+        function cancelEdit() {
+            window.location.href = "admin.html";
+        }
+    </script>            
 </body>
 </html>
