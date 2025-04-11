@@ -27,8 +27,10 @@
       display: flex;
       justify-content: center;
       margin-bottom: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .button-row button {
+    .button-row button, .sort-btn {
       padding: 10px 20px;
       background-color: #007bff;
       color: white;
@@ -36,7 +38,7 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    .button-row button:hover {
+    .button-row button:hover, .sort-btn:hover {
       background-color: #0056b3;
     }
     input, select {
@@ -46,17 +48,6 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
-    }
-    .sort-btn {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .sort-btn:hover {
-      background-color: #218838;
     }
     .table-container {
       margin-top: 20px;
@@ -91,7 +82,7 @@
 
     <input type="text" id="searchInput" placeholder="検索（番号・名前・入学年度）" oninput="searchEntries()">
 
-    <div>
+    <div style="margin-top: 10px;">
       <select id="sortSelect" onchange="sortTable()">
         <option value="number">番号でソート</option>
         <option value="admissionYear">入学年度でソート</option>
