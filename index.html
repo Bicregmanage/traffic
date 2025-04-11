@@ -1,21 +1,39 @@
 <!DOCTYPE html>
+<script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
+  async function checkAccess() {
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const idToken = params.get('id_token') || sessionStorage.getItem('id_token');
 
-  if (code) {
-    sessionStorage.setItem('auth_code', code);
-  } else {
-    const storedCode = sessionStorage.getItem('auth_code');
-    if (!storedCode) {
+    if (params.get('id_token')) {
+      sessionStorage.setItem('id_token', params.get('id_token'));
+      // URLのハッシュを消す
+      history.replaceState(null, null, window.location.pathname);
+    }
+
+    if (!idToken) {
       const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
         '?client_id=67qjddtattdr5i1871723tbtnt' +
-        '&response_type=code' +
+        '&response_type=token' +
         '&scope=email+openid' +
-        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Findex.html'; // ✅ 修正済み
+        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Findex.html';
       window.location.href = loginUrl;
+      return;
+    }
+
+    try {
+      const { decodeJwt } = jose;
+      const payload = decodeJwt(idToken);
+      console.log("👤 認証済みユーザー:", payload.email || "(emailなし)");
+    } catch (e) {
+      alert('トークンの検証に失敗しました。ログインし直してください。');
+      sessionStorage.clear();
+      window.location.href = '/traffic/index.html';
     }
   }
+
+  checkAccess();
 </script>
 
 <html lang="ja">
