@@ -61,105 +61,80 @@
         <button class="delete-btn" onclick="confirmDelete()">削除</button>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", loadEntry);
-
-        async function loadEntry() {
-            let params = new URLSearchParams(window.location.search);
-            let index = params.get("index");
-            
-            console.log("Index:", index);
-            
+        let number;
+    
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            number = params.get("number");
+            if (number) {
+                fetchEntry(number);
+            }
+        });
+    
+        async function fetchEntry(number) {
             try {
-                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`);
-                
-                console.log("Response status:", response.status);
-                
-                if (!response.ok) {
-                    let errorText = await response.text();
-                    console.error('Failed to load entry:', errorText);
-                    alert('エントリの読み込みに失敗しました: ' + errorText);
-                    return;
-                }
-                
-                let entry = await response.json();
-                
-                console.log("Entry:", entry);
-                
+                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries?number=${number}`);
+                let entries = await response.json();
+                const entry = entries.find(e => e.number === number);
+    
                 if (entry) {
                     document.getElementById("numberInput").value = entry.number;
                     document.getElementById("nameInput").value = entry.name;
                     document.getElementById("memoInput").value = entry.memo;
+                } else {
+                    alert("該当するエントリが見つかりません");
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('エントリの読み込みに失敗しました: ' + error.message);
+                alert('エントリの読み込みに失敗しました');
             }
         }
-
-        async function saveEntry() {
-            let params = new URLSearchParams(window.location.search);
-            let index = params.get("index");
-            let number = document.getElementById("numberInput").value;
-            let name = document.getElementById("nameInput").value;
-            let memo = document.getElementById("memoInput").value;
-            let timestamp = new Date().toLocaleString();
-
-            if (number.length !== 3 || name.trim() === "") {
-                alert("3桁の番号と名前を入力してください");
-                return;
-            }
-
-            let entry = { number, name, memo, timestamp };
-
+    
+        async function saveChanges() {
+            const name = document.getElementById("nameInput").value;
+            const memo = document.getElementById("memoInput").value;
+            const timestamp = new Date().toLocaleString();
+    
             try {
-                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(entry)
+                const response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ number, name, memo, timestamp })
                 });
-
+    
                 if (response.ok) {
+                    alert("変更が保存されました");
                     window.location.href = "admin.html";
                 } else {
-                    alert('エントリの保存に失敗しました');
+                    alert("保存に失敗しました");
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('エントリの保存に失敗しました');
+                console.error("Error:", error);
+                alert("保存に失敗しました");
             }
         }
-
-        function cancel() {
-            window.location.href = "admin.html";
-        }
-
-        async function confirmDelete() {
-            if (confirm("本当に削除しますか？")) {
-                deleteEntry();
-            }
-        }
-
+    
         async function deleteEntry() {
-            let params = new URLSearchParams(window.location.search);
-            let index = params.get("index");
-
+            if (!confirm("本当に削除しますか？")) return;
+    
             try {
-                let response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries/${index}`, {
-                    method: 'DELETE'
+                const response = await fetch(`https://5n45f0gzc2.execute-api.us-east-2.amazonaws.com/entries`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ number })
                 });
-
+    
                 if (response.ok) {
+                    alert("削除しました");
                     window.location.href = "admin.html";
                 } else {
-                    alert('エントリの削除に失敗しました');
+                    alert("削除に失敗しました");
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('エントリの削除に失敗しました');
+                console.error("Error:", error);
+                alert("削除に失敗しました");
             }
         }
-    </script>
+    </script>    
 </body>
 </html>
