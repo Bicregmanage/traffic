@@ -1,246 +1,158 @@
 <!DOCTYPE html>
-<script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
-<script>
-  async function checkAccess() {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const idTokenFromHash = params.get('id_token');
-
-    if (idTokenFromHash) {
-      sessionStorage.setItem('id_token', idTokenFromHash);
-      history.replaceState(null, null, window.location.pathname); // URLの #id_token=... を消す
-    }
-
-    const idToken = sessionStorage.getItem('id_token');
-
-    if (!idToken) {
-      // トークンがない → Hosted UI にリダイレクト
-      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
-        '?client_id=67qjddtattdr5i1871723tbtnt' +
-        '&response_type=token' +
-        '&scope=email+openid' +
-        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Findex.html';
-      window.location.href = loginUrl;
-      return;
-    }
-
-    try {
-      const { decodeJwt } = jose;
-      const payload = decodeJwt(idToken);
-      console.log("🔓 ログイン済み:", payload);
-    } catch (e) {
-      console.error("❌ トークンの解析失敗:", e);
-      sessionStorage.clear();
-      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
-        '?client_id=67qjddtattdr5i1871723tbtnt' +
-        '&response_type=token' +
-        '&scope=email+openid' +
-        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Findex.html';
-      window.location.href = loginUrl;
-    }
-  }
-
-  checkAccess();
-</script>
-
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登録番号検索システム</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background-color: #f0f0f0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        .container { 
-            width: 500px; 
-            padding: 20px; 
-            background-color: #fff; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-            border-radius: 8px; 
-            text-align: center; 
-            margin-top: 8%;
-        }
-        input, textarea { 
-            margin: 10px 0; 
-            padding: 10px; 
-            width: calc(100% - 22px); 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-        }
-        button { 
-            padding: 10px 20px; 
-            margin: 10px 5px; 
-            border: none; 
-            border-radius: 4px; 
-            background-color: #007bff; 
-            color: white; 
-            cursor: pointer; 
-        }
-        button:hover { 
-            background-color: #0056b3; 
-        }
-        .table-container { 
-            max-height: 300px; 
-            overflow-y: auto; 
-            margin-top: 20px; 
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-        th, td { 
-            padding: 10px; 
-            border: 1px solid #ccc; 
-            text-align: left; 
-        }
-        th { 
-            background-color: #f9f9f9; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        .edit-btn { 
-            background-color: gray; 
-            color: white; 
-            border: none; 
-            padding: 5px; 
-            cursor: pointer; 
-            margin-left: 5px; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        .edit-btn:hover {
-            background-color: gray;
-        }
-        .sort-btn { 
-            background-color: #28a745; 
-            color: white; 
-            border: none; 
-            padding: 5px 10px; 
-            cursor: pointer; 
-            margin-left: 5px; 
-        }
-        .sort-btn:hover { 
-            background-color: #218838; 
-        }
-        .name-cell, .memo-cell { 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        @media (max-width: 600px) {
-        .controls {
-            flex-direction: column;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登録番号検索システム</title>
+  <script src="https://cdn.jsdelivr.net/npm/jose@4.14.4/dist/browser/index.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 50px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, select, button { width: 100%; padding: 10px; margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; }
+    th { background: #f9f9f9; }
+    .sort-btn { background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-top: 10px; }
+    .sort-btn:hover { background-color: #218838; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>登録番号検索システム</h2>
-        <button onclick="redirectToAdmin()">管理者ページへ</button>
-        <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
-        <div>
-            <select id="sortSelect" onchange="sortTable()">
-                <option value="number">番号でソート</option>
-                <option value="timestamp">追加日時でソート</option>
-            </select>
-            <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>番号</th>
-                        <th>名前</th>
-                        <th>メモ</th>
-                        <th>追加日時</th>
-                    </tr>
-                </thead>
-                <tbody id="entryList"></tbody>
-            </table>
-        </div>
-    </div>
-    <script>
-        function redirectToAdmin() {
-          const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
-            '?client_id=67qjddtattdr5i1871723tbtnt' +
-            '&response_type=token' +
-            '&scope=email+openid' +
-            '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
-          window.location.href = loginUrl;
-        }
-        let sortDirection = true;
-    
-        document.addEventListener("DOMContentLoaded", loadEntries);
-    
-        async function loadEntries() {
-            try {
-                const response = await fetch('https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries');
-                const data = await response.json();
-                window.entries = data;
-                renderEntries(data);
-            } catch (error) {
-                console.error('読み込みエラー:', error);
-                alert('登録番号の読み込みに失敗しました。');
-            }
-        }
-    
-        function renderEntries(data) {
-            const entryList = document.getElementById("entryList");
-            entryList.innerHTML = "";
-            data.forEach(entry => {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${entry.number}</td>
-                    <td>${entry.name}</td>
-                    <td>${entry.memo}</td>
-                    <td>${entry.timestamp}</td>
-                `;
-                entryList.appendChild(tr);
-            });
-        }
-    
-        function searchEntries() {
-            const keyword = document.getElementById("searchInput").value.toLowerCase();
-            const filtered = window.entries.filter(entry =>
-                entry.number.includes(keyword) || entry.name.toLowerCase().includes(keyword)
-            );
-            renderEntries(filtered);
-        }
-    
-        function sortTable() {
-            const key = document.getElementById("sortSelect").value;
-        
-            const sorted = [...window.entries].sort((a, b) => {
-                let valA = a[key];
-                let valB = b[key];
-        
-                if (key === "number") {
-                    valA = parseInt(valA);
-                    valB = parseInt(valB);
-                    return sortDirection ? valA - valB : valB - valA;
-                } else {
-                    return sortDirection
-                        ? valA.localeCompare(valB, 'ja')
-                        : valB.localeCompare(valA, 'ja');
-                }
-            });
-        
-            renderEntries(sorted);
-        }
+  <script>
+    async function checkAccess() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const idTokenFromHash = params.get('id_token');
 
-        function toggleSortDirection() {
-            sortDirection = !sortDirection;
-            sortTable();
+      if (idTokenFromHash) {
+        sessionStorage.setItem('id_token', idTokenFromHash);
+        history.replaceState(null, null, window.location.pathname); // #id_token を消す
+      }
+
+      const idToken = sessionStorage.getItem('id_token');
+
+      if (!idToken) {
+        // 未ログイン → Hosted UI にリダイレクト
+        const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+          '?client_id=67qjddtattdr5i1871723tbtnt' +
+          '&response_type=token' +
+          '&scope=email+openid' +
+          '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Findex.html';
+        window.location.href = loginUrl;
+        return;
+      }
+
+      // トークン検証
+      try {
+        const { decodeJwt } = jose;
+        const payload = decodeJwt(idToken);
+        console.log("✅ 認証済み:", payload.email || "(emailなし)");
+      } catch (e) {
+        console.error("❌ トークン解析失敗:", e);
+        sessionStorage.clear();
+        window.location.href = '/traffic/index.html'; // 再ログイン
+      }
+    }
+
+    checkAccess();
+  </script>
+
+  <div class="container">
+    <h2>登録番号検索システム</h2>
+    <button onclick="redirectToAdmin()">管理者ページへ</button>
+    <input type="text" id="searchInput" placeholder="検索 (番号または名前)" oninput="searchEntries()">
+    <div>
+      <select id="sortSelect" onchange="sortTable()">
+        <option value="number">番号でソート</option>
+        <option value="timestamp">追加日時でソート</option>
+      </select>
+      <button class="sort-btn" onclick="toggleSortDirection()">ソート順序を変更</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>番号</th>
+          <th>名前</th>
+          <th>メモ</th>
+          <th>追加日時</th>
+        </tr>
+      </thead>
+      <tbody id="entryList"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let sortDirection = true;
+
+    document.addEventListener("DOMContentLoaded", loadEntries);
+
+    async function loadEntries() {
+      try {
+        const response = await fetch('https://shqipfhr9d.execute-api.us-east-2.amazonaws.com/entries');
+        const data = await response.json();
+        window.entries = data;
+        renderEntries(data);
+      } catch (error) {
+        console.error('読み込みエラー:', error);
+        alert('登録番号の読み込みに失敗しました。');
+      }
+    }
+
+    function renderEntries(data) {
+      const entryList = document.getElementById("entryList");
+      entryList.innerHTML = "";
+      data.forEach(entry => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${entry.number}</td>
+          <td>${entry.name}</td>
+          <td>${entry.memo}</td>
+          <td>${entry.timestamp}</td>
+        `;
+        entryList.appendChild(tr);
+      });
+    }
+
+    function searchEntries() {
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = window.entries.filter(entry =>
+        entry.number.includes(keyword) || entry.name.toLowerCase().includes(keyword)
+      );
+      renderEntries(filtered);
+    }
+
+    function sortTable() {
+      const key = document.getElementById("sortSelect").value;
+      const sorted = [...window.entries].sort((a, b) => {
+        let valA = a[key];
+        let valB = b[key];
+
+        if (key === "number") {
+          valA = parseInt(valA);
+          valB = parseInt(valB);
+          return sortDirection ? valA - valB : valB - valA;
+        } else {
+          return sortDirection
+            ? valA.localeCompare(valB, 'ja')
+            : valB.localeCompare(valA, 'ja');
         }
-    </script>    
+      });
+
+      renderEntries(sorted);
+    }
+
+    function toggleSortDirection() {
+      sortDirection = !sortDirection;
+      sortTable();
+    }
+
+    function redirectToAdmin() {
+      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+        '?client_id=67qjddtattdr5i1871723tbtnt' +
+        '&response_type=token' +
+        '&scope=email+openid' +
+        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Fadmin.html';
+      window.location.href = loginUrl;
+    }
+  </script>
 </body>
 </html>
