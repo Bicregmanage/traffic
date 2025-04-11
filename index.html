@@ -4,15 +4,17 @@
   async function checkAccess() {
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
-    const idToken = params.get('id_token') || sessionStorage.getItem('id_token');
+    const idTokenFromHash = params.get('id_token');
 
-    if (params.get('id_token')) {
-      sessionStorage.setItem('id_token', params.get('id_token'));
-      // URLのハッシュを消す
-      history.replaceState(null, null, window.location.pathname);
+    if (idTokenFromHash) {
+      sessionStorage.setItem('id_token', idTokenFromHash);
+      history.replaceState(null, null, window.location.pathname); // URLの #id_token=... を消す
     }
 
+    const idToken = sessionStorage.getItem('id_token');
+
     if (!idToken) {
+      // トークンがない → Hosted UI にリダイレクト
       const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
         '?client_id=67qjddtattdr5i1871723tbtnt' +
         '&response_type=token' +
@@ -25,11 +27,16 @@
     try {
       const { decodeJwt } = jose;
       const payload = decodeJwt(idToken);
-      console.log("👤 認証済みユーザー:", payload.email || "(emailなし)");
+      console.log("🔓 ログイン済み:", payload);
     } catch (e) {
-      alert('トークンの検証に失敗しました。ログインし直してください。');
+      console.error("❌ トークンの解析失敗:", e);
       sessionStorage.clear();
-      window.location.href = '/traffic/index.html';
+      const loginUrl = 'https://us-east-1xfqyhityj.auth.us-east-1.amazoncognito.com/login' +
+        '?client_id=67qjddtattdr5i1871723tbtnt' +
+        '&response_type=token' +
+        '&scope=email+openid' +
+        '&redirect_uri=https%3A%2F%2Fbicregmanage.github.io%2Ftraffic%2Findex.html';
+      window.location.href = loginUrl;
     }
   }
 
