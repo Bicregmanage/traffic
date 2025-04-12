@@ -6,165 +6,161 @@
   <title>登録番号照会</title>
   <style>
     html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-    }
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+  }
 
+  .container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .button-row button,
+  .sort-btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .button-row button:hover,
+  .sort-btn:hover {
+    background-color: #0056b3;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  .table-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    margin-top: 20px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    padding: 10px;
+    background-color: #fafafa;
+    max-height: 100%;
+  }
+
+  .table-container table {
+    min-width: 600px;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+  }
+
+  .table-container thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f0f0f0;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .table-container th,
+  .table-container td {
+    white-space: nowrap;
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .logout-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 8px 16px;
+    background-color: #c62828;
+    color: white;
+    border: none;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  .logout-button:hover {
+    background-color: #b71c1c;
+  }
+
+  @media screen and (max-width: 768px) {
     .container {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-      overflow: hidden;
+      max-width: 95%;
+      padding: 16px;
+      height: calc(100vh - 20px);
     }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
+    .logout-button {
+      top: 12px;
+      right: 12px;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    button,
+    .sort-btn {
+      font-size: 0.9rem;
+      padding: 8px 14px;
     }
 
     .button-row {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .button-row button,
-    .sort-btn {
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .button-row button:hover,
-    .sort-btn:hover {
-      background-color: #0056b3;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-
-    /* テーブル領域 */
     .table-container {
-      flex-grow: 1;
-      overflow-y: auto;
-      overflow-x: auto;
-      margin-top: 20px;
-      border: 1px solid #aaa;
-      border-radius: 6px;
-      padding: 10px;
-      background-color: #fafafa;
-      max-height: 100%;
-    }
-
-    .table-container table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      table-layout: fixed;
-    }
-
-    .table-container thead th {
-      position: sticky;
-      top: 0;
-      background-color: #f0f0f0;
-      z-index: 2;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 5px;
     }
 
     .table-container th,
     .table-container td {
-      min-width: 100px;
-      white-space: nowrap;
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
+      padding: 6px;
+      font-size: 0.9em;
     }
 
-    tbody tr:nth-child(even) {
-      background-color: #f9f9f9;
+    h2 {
+      font-size: 1.2em;
     }
-
-    /* ログアウトボタン */
-    .logout-button {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      padding: 8px 16px;
-      background-color: #c62828;
-      color: white;
-      border: none;
-      font-size: 0.9rem;
-      border-radius: 6px;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    .logout-button:hover {
-      background-color: #b71c1c;
-    }
-
-    /* スマホ対応 */
-    @media screen and (max-width: 768px) {
-      .container {
-        max-width: 95%;
-        padding: 16px;
-        height: calc(100vh - 20px);
-      }
-
-      .logout-button {
-        top: 12px;
-        right: 12px;
-        padding: 6px 12px;
-        font-size: 13px;
-      }
-
-      button,
-      .sort-btn {
-        font-size: 0.9rem;
-        padding: 8px 14px;
-      }
-
-      .button-row {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .table-container {
-        padding: 5px;
-      }
-
-      .table-container th,
-      .table-container td {
-        padding: 6px;
-        font-size: 0.9em;
-      }
-
-      h2 {
-        font-size: 1.2em;
-      }
-    }
+  }
 
   </style>
 </head>
