@@ -5,184 +5,170 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>管理者ページ</title>
   <style>
-    /* ベーススタイル */
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
-}
-
-/* メインレイアウト */
-.container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  max-width: 700px;
-  margin: 40px auto;
-  background-color: #fff;
-  padding: 20px;
-  box-sizing: border-box;
-  border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-}
-
-/* タイトル */
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-/* 入力・選択フィールド */
-input, select, textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-/* ボタン中央寄せ */
-.center-buttons {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-/* ボタン共通スタイル */
-button, .sort-btn {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover, .sort-btn:hover {
-  background-color: #0056b3;
-}
-
-/* 編集ボタン */
-.edit-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.edit-btn:hover {
-  background-color: #218838;
-}
-
-/* ログアウトボタン */
-.logout-button {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background-color: #c62828;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  border-radius: 6px;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.logout-button:hover {
-  background-color: #b71c1c;
-}
-
-/* テーブルコンテナ */
-.table-container {
-  flex-grow: 1;
-  overflow-y: auto;
-  margin-top: 20px;
-  border: 1px solid #aaa;
-  border-radius: 6px;
-  padding: 10px;
-  background-color: #fafafa;
-  max-height: 100%;
-  overflow-x: auto;
-}
-
-/* テーブルレイアウト */
-.table-container table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-}
-
-/* テーブルヘッダー固定 */
-.table-container thead th {
-  position: sticky;
-  top: 0;
-  background-color: #f0f0f0;
-  z-index: 2;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-/* テーブルセル共通 */
-.table-container th, .table-container td {
-  min-width: 100px;
-  white-space: nowrap;
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: left;
-}
-
-/* 偶数行背景 */
-tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-/* スマホ対応 */
-@media (max-width: 768px) {
+    html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+  }
+  
+  
   .container {
-    max-width: 95%;
-    padding: 16px;
-  }
-
-  .logout-button {
-    top: 12px;
-    right: 12px;
-    padding: 6px 12px;
-    font-size: 13px;
-  }
-
-  .center-buttons {
+    position: relative;
+    display: flex;
     flex-direction: column;
-    align-items: center;
+    min-height: 100vh;
+    max-width: 700px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   }
-
-  button, .sort-btn {
-    font-size: 0.9rem;
-    padding: 8px 14px;
-  }
-
-  .table-container {
-    padding: 5px;
-  }
-
-  .table-container th, .table-container td {
-    padding: 6px;
-    font-size: 0.9em;
-  }
-
+  
   h2 {
-    font-size: 1.2em;
+    text-align: center;
+    margin-bottom: 20px;
   }
-}
-
+  
+  input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .center-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  
+  button, .sort-btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover, .sort-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .edit-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .edit-btn:hover {
+    background-color: #218838;
+  }
+  
+  .logout-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background-color: #c62828;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 10;
+  }
+  
+  .logout-button:hover {
+    background-color: #b71c1c;
+  }
+  
+  .table-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-top: 20px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    padding: 10px;
+    background-color: #fafafa;
+    max-height: 100%;
+    overflow-x: auto;
+  }
+  
+  .table-container table {
+    min-width: 600px;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+  }
+  
+  .table-container thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f0f0f0;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .table-container th, .table-container td {
+    white-space: nowrap;
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      max-width: 95%;
+      padding: 16px;
+    }
+  
+    .logout-button {
+      top: 12px;
+      right: 12px;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+  
+    .center-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    button, .sort-btn {
+      font-size: 0.9rem;
+      padding: 8px 14px;
+    }
+  
+    .table-container {
+      padding: 5px;
+    }
+  
+    .table-container th, .table-container td {
+      padding: 6px;
+      font-size: 0.9em;
+    }
+  
+    h2 {
+      font-size: 1.2em;
+    }
+  }
+  
   </style>
 </head>
 <body>
