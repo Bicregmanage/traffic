@@ -52,7 +52,7 @@
     }
     .table-container {
       margin-top: 20px;
-      max-height: 300px;
+      max-height: flex;
       overflow-y: auto;
       border: 1px solid #aaa;
       border-radius: 6px;
@@ -160,6 +160,12 @@
     flex-grow: 1;
     overflow-y: auto;
   }
+  .table-container table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+  }
   @media (max-width: 768px) {
     .container {
       max-width: 95%;
@@ -191,6 +197,9 @@
 
   .table-container {
     overflow-x: auto;
+  }
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
   }
 
   </style>
