@@ -95,7 +95,7 @@
   }
   
   .table-container {
-    flex-grow: 1;
+    flex-grow: 1;                                                                                                       
     overflow-y: auto;
     margin-top: 20px;
     border: 1px solid #aaa;
@@ -168,7 +168,14 @@
       font-size: 1.2em;
     }
   }
-  
+
+  .memo-cell {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   </style>
 </head>
 <body>
@@ -265,7 +272,7 @@
           <td>${entry.number}</td>
           <td>${entry.name}</td>
           <td>${entry.admissionYear || ""}</td>
-          <td>${entry.memo}</td>
+          <td class="memo-cell">${entry.memo}</td>
           <td>${formatToLocalTime(entry.timestamp)}</td>
           <td><button class="edit-btn" onclick="editEntry('${entry.number}')">編集</button></td>
         `;
