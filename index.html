@@ -85,12 +85,43 @@
   .logout-button:hover {
     background-color: #8b1a1a;
   }
+
+.main-card {
+  position: relative;
+  max-width: 800px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logout-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #c62828;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.logout-button:hover {
+  background-color: #b71c1c;
+}
+
   </style>
 </head>
 <body>
   <div class="container">
     <h2>登録番号検索システム</h2>
-    
+    <div class="main-card">
+      <button class="logout-button" onclick="logout()">ログアウト</button>
+    </div>
     <div class="button-row">
       <button onclick="location.href='admin.html'">管理者ページへ</button>
     </div>
@@ -121,7 +152,6 @@
       </table>
     </div>
   </div>
-  <button class="logout-button" onclick="logout()">ログアウト</button>
   <script>
     function logout() {
       localStorage.removeItem("id_token");
@@ -214,7 +244,7 @@
       const idToken = localStorage.getItem("id_token");
   
       if (!idToken) {
-        // 未ログインなら login.html に飛ばす
+   
         window.location.href = "login.html";
         return;
       }
@@ -224,13 +254,11 @@
         const groups = payload["cognito:groups"] || [];
   
         if (requiredGroup && !groups.includes(requiredGroup)) {
-          // 必要なグループに入ってない場合は index.html にリダイレクト
           alert("アクセス権限がありません。");
           window.location.href = "index.html";
           return;
         }
-  
-        // 認証OKならコンソール表示（任意）
+
         console.log("ログイン中:", payload.email || payload.username);
   
       } catch (e) {
