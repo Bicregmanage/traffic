@@ -186,6 +186,7 @@
     flex-grow: 1;
     overflow-y: auto;
     overflow-x: auto;
+    max-height: flex;
     border: 1px solid #aaa;
     border-radius: 6px;
     background-color: #fafafa;
@@ -195,6 +196,7 @@
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
+    table-layout: fixed;
   }
 
   .table-container thead th {
@@ -209,7 +211,9 @@
     min-width: 100px;
     white-space: nowrap;
   }
-
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
   </style>
 </head>
 <body>
