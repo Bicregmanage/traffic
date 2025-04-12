@@ -169,5 +169,52 @@
     populateYearOptions();
     fetchEntry();
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <script>
+    function parseHashToken() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const idToken = params.get("id_token");
+  
+      if (idToken) {
+        localStorage.setItem("id_token", idToken);
+        window.history.replaceState({}, document.title, window.location.pathname); // URLからトークン消す
+      }
+    }
+  
+    function checkAuth(requiredGroup = null) {
+      parseHashToken();
+      const idToken = localStorage.getItem("id_token");
+  
+      if (!idToken) {
+        // 未ログインなら login.html に飛ばす
+        window.location.href = "login.html";
+        return;
+      }
+  
+      try {
+        const payload = jwt_decode(idToken);
+        const groups = payload["cognito:groups"] || [];
+  
+        if (requiredGroup && !groups.includes(requiredGroup)) {
+          // 必要なグループに入ってない場合は index.html にリダイレクト
+          alert("アクセス権限がありません。");
+          window.location.href = "index.html";
+          return;
+        }
+  
+        // 認証OKならコンソール表示（任意）
+        console.log("ログイン中:", payload.email || payload.username);
+  
+      } catch (e) {
+        console.error("トークンの解析に失敗しました", e);
+        localStorage.removeItem("id_token");
+        window.location.href = "login.html";
+      }
+    }
+  </script>  
+  <script>
+    checkAuth("admin");
+  </script>  
 </body>
 </html>
