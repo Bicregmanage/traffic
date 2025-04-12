@@ -27,15 +27,16 @@
       font-size: 1.5em;
     }
 
-    form label {
+    label {
       display: block;
       margin-bottom: 8px;
       font-weight: bold;
     }
 
-    form input[type="text"],
-    form select,
-    form textarea {
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
       width: 100%;
       padding: 10px 12px;
       margin-bottom: 20px;
@@ -45,7 +46,7 @@
       box-sizing: border-box;
     }
 
-    form textarea {
+    textarea {
       resize: vertical;
       min-height: 80px;
     }
@@ -64,73 +65,46 @@
       border: none;
       cursor: pointer;
       min-width: 100px;
+      color: white;
     }
 
     .button-save {
       background-color: #1976d2;
-      color: white;
     }
+
     .button-save:hover {
       background-color: #1565c0;
     }
 
-    .button-cancel {
-      background-color: #9e9e9e;
-      color: white;
-    }
-    .button-cancel:hover {
-      background-color: #757575;
-    }
-
     .button-delete {
       background-color: #d32f2f;
-      color: white;
     }
+
     .button-delete:hover {
       background-color: #b71c1c;
     }
-    .table-container {
-      flex-grow: 1;
-      overflow-y: auto;
-      overflow-x: auto;
-      border: 1px solid #aaa;
-      border-radius: 6px;
-      background-color: #fafafa;
+
+    .button-cancel {
+      background-color: #9e9e9e;
     }
 
-    .table-container table {
-      border-collapse: separate;
-      border-spacing: 0;
-      width: 100%;
+    .button-cancel:hover {
+      background-color: #757575;
     }
-
-    .table-container thead th {
-      position: sticky;
-      top: 0;
-      background-color: #f0f0f0;
-      z-index: 2;
-    }
-
-    .table-container table th,
-    .table-container table td {
-      min-width: 100px;
-      white-space: nowrap;
-    }
-
   </style>  
 </head>
 <body>
   <div class="container">
-    <h2>登録情報の編集</h2>
+    <h1>登録情報の編集</h1>
     <input type="number" id="numberInput" placeholder="番号">
     <input type="text" id="nameInput" placeholder="名前">
     <select id="yearSelect"></select>
     <textarea id="memoInput" placeholder="メモ"></textarea>
 
-    <div class="btn-group">
-      <button onclick="saveEntry()">保存</button>
-      <button class="delete-btn" onclick="deleteEntry()">削除</button>
-      <button class="cancel-btn" onclick="location.href='admin.html'">キャンセル</button>
+    <div class="button-group">
+      <button class="button-save" onclick="saveEntry()">保存</button>
+      <button class="button-delete" onclick="deleteEntry()">削除</button>
+      <button class="button-cancel" onclick="location.href='admin.html'">キャンセル</button>
     </div>
   </div>
 
@@ -237,7 +211,7 @@
   
       if (idToken) {
         localStorage.setItem("id_token", idToken);
-        window.history.replaceState({}, document.title, window.location.pathname); // URLからトークン消す
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
   
@@ -268,9 +242,8 @@
         window.location.href = "login.html";
       }
     }
-  </script>  
-  <script>
+
     checkAuth("admin");
-  </script>  
+  </script>
 </body>
 </html>
