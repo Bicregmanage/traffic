@@ -184,20 +184,21 @@
     .side-menu {
       position: absolute;
       top: 56px;
-      left: 0;
+      left: 16px;
       width: 200px;
       background-color: #ffffff;
       border: 1px solid #ccc;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      transform: translateX(-110%);
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      max-height: 0;
+      overflow: hidden;
       opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
       z-index: 11;
     }
 
     .side-menu.open {
-      transform: translateX(0);
+      max-height: 500px;
       opacity: 1;
     }
 
