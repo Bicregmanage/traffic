@@ -509,6 +509,7 @@
   
       try {
         const payload = jwt_decode(idToken);
+        console.log("トークンの中身:", payload);
         const groups = payload["cognito:groups"] || [];
   
         if (requiredGroup && !groups.includes(requiredGroup)) {
