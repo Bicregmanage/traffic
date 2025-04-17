@@ -236,6 +236,26 @@
     .material-symbols-outlined:hover {
       background-color: #d0d0d0;
     }
+
+    .sort-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .sort-icon {
+      cursor: pointer;
+      font-size: 28px;
+      color: #007bff;
+      user-select: none;
+      transition: color 0.2s ease;
+    }
+
+    .sort-icon:hover {
+      color: #0056b3;
+    }
+
   </style>
 </head>
 <body>
@@ -250,7 +270,7 @@
 
     <input type="text" id="searchInput" placeholder="検索（番号・名前・入学年度）" oninput="searchEntries()">
 
-    <div style="margin-top: 10px;">
+    <div class="sort-row" style="margin-top: 10px;">
       <select id="sortSelect" onchange="sortTable()">
         <option value="number">番号でソート</option>
         <option value="admissionYear">入学年度でソート</option>
