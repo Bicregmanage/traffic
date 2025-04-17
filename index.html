@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>登録番号照会</title>
+  <title>番号照会ページ</title>
   <style>
     html, body {
       height: 100%;
@@ -175,35 +175,42 @@
       left: 16px;
       font-size: 24px;
       cursor: pointer;
-      z-index: 11;
+      z-index: 12;
+      color: #007bff;
+      background-color: transparent;
+      border: none;
     }
 
     .side-menu {
-      position: fixed;
-      left: -250px;
-      top: 0;
-      height: 100%;
+      position: absolute;
+      top: 56px;
+      left: 0;
       width: 200px;
-      background-color: #333;
-      color: white;
-      padding-top: 60px;
-      transition: left 0.3s ease;
-      z-index: 10;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transform: translateX(-110%);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+      z-index: 11;
+    }
+
+    .side-menu.open {
+      transform: translateX(0);
+      opacity: 1;
     }
 
     .side-menu a {
       display: block;
-      padding: 12px 20px;
-      color: white;
+      padding: 12px 16px;
+      color: #007bff;
       text-decoration: none;
+      border-bottom: 1px solid #eee;
     }
 
     .side-menu a:hover {
-      background-color: #575757;
-    }
-
-    .side-menu.open {
-      left: 0;
+      background-color: #f0f0f0;
     }
   </style>
 </head>
@@ -211,8 +218,8 @@
   <div class="container">
     <div class="menu-icon" onclick="toggleMenu()">☰</div>
     <div id="sideMenu" class="side-menu">
-      <a href="index.html">一般ページへ</a>
-      <a href="admin.html">管理者ページへ</a>
+      <a href="index.html">番号照会ページ</a>
+      <a href="admin.html">管理者ページ</a>
       <a href="#" onclick="logout()">ログアウト</a>
     </div>
     <h2>登録番号照会</h2>
