@@ -281,6 +281,10 @@
     .edit-icon:hover {
         color: #1e7e34;
     }
+
+    .side-menu a.userEmail:hover{
+        background-color: none;
+    }
   </style>
 </head>
 <body>
@@ -289,7 +293,7 @@
     <div id="sideMenu" class="side-menu">
       <a href="index.html">番号照会ページ</a>
       <a href="admin.html">管理者ページ</a>
-      <a href="#" id="userDisplay" style="cursor: default; font-weight: bold; color: #333;">ログイン中</a>
+      <a href="#" class="userEmail" id="userDisplay" style="cursor: default; font-weight: bold; color: #333;">ログイン中</a>
       <a href="#" class="logout-link" onclick="logout()">ログアウト</a>
     </div>
 
