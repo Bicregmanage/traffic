@@ -521,9 +521,10 @@
         console.log("ログイン中:", payload.email || payload.username);
 
         const userName = payload["email"];
+        const emailNameOnly = userEmail.split("@")[0];
         const userDisplayEl = document.getElementById("userDisplay");
         if (userDisplayEl && userName) {
-            userDisplayEl.textContent = `${userName} さんがログイン中`;
+            userDisplayEl.textContent = `${emailNameOnly} さんがログイン中`;
         }
 
   
