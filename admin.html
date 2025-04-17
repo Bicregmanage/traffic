@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
   <title>管理者ページ</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=swap_vert" />
   <style>
@@ -270,6 +271,17 @@
     .side-menu a.logout-link {
       color: #ff4d4d;
     }
+
+    .edit-icon {
+        cursor: pointer;
+        font-size: 24px;
+        color: #28a745;
+        transition: color 0.2s ease;
+    }
+
+    .edit-icon:hover {
+        color: #1e7e34;
+    }
   </style>
 </head>
 <body>
@@ -312,7 +324,7 @@
             <th>入学年度</th>
             <th>メモ</th>
             <th>追加日時</th>
-            <th>操作</th>
+            <th>編集</th>
           </tr>
         </thead>
         <tbody id="entryList"></tbody>
@@ -390,7 +402,7 @@
           <td>${entry.admissionYear || ""}</td>
           <td class="memo-cell">${entry.memo}</td>
           <td>${formatToLocalTime(entry.timestamp)}</td>
-          <td><button class="edit-btn" onclick="editEntry('${entry.number}')">編集</button></td>
+          <td><span class="material-symbols-outlined edit-icon" onclick="editEntry('${entry.number}')">edit_note</span></td>
         `;
         tbody.appendChild(tr);
       });
