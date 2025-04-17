@@ -274,6 +274,18 @@
       const menu = document.getElementById("sideMenu");
       menu.classList.toggle("open");
     }
+
+    document.addEventListener("click", function(event) {
+        const menu = document.getElementById("sideMenu");
+        const icon = document.querySelector(".menu-icon");
+        if (
+        menu.classList.contains("open") &&
+        !menu.contains(event.target) &&
+        !icon.contains(event.target)
+        ) {
+        menu.classList.remove("open");
+        }
+      });
   </script>
   <script>
     function logout() {
