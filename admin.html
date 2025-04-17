@@ -180,7 +180,7 @@
   .menu-icon {
       position: absolute;
       top: 16px;
-      left: 16px;
+      left: 18px;
       font-size: 24px;
       cursor: pointer;
       z-index: 12;
@@ -341,6 +341,7 @@
   </script>
   <script>
     let sortDirection = true;
+    let currentDisplayedEntries = [];
 
     document.addEventListener("DOMContentLoaded", () => {
       populateAdmissionYears();
@@ -371,6 +372,7 @@
     }
 
     function renderEntries(data) {
+      currentDisplayedEntries = data;
       const tbody = document.getElementById("entryList");
       tbody.innerHTML = "";
       data.forEach(entry => {
@@ -449,7 +451,7 @@
 
     function sortTable() {
       const key = document.getElementById("sortSelect").value;
-      const sorted = [...window.entries].sort((a, b) => {
+      const sorted = [...currentDisplayedEntries].sort((a, b) => {
         let valA = a[key] || "";
         let valB = b[key] || "";
         return sortDirection
