@@ -176,15 +176,54 @@
     text-overflow: ellipsis;
   }
 
+  .menu-icon {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 11;
+    }
+
+    .side-menu {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        height: 100%;
+        width: 200px;
+        background-color: #333;
+        color: white;
+        padding-top: 60px;
+        transition: left 0.3s ease;
+        z-index: 10;
+    }
+
+    .side-menu a {
+        display: block;
+        padding: 12px 20px;
+        color: white;
+        text-decoration: none;
+    }
+
+    .side-menu a:hover {
+        background-color: #575757;
+    }
+
+    .side-menu.open {
+        left: 0;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>管理者ページ</h2>
-    <button class="logout-button" onclick="logout()">ログアウト</button>
-    <div class="center-buttons">
-      <button onclick="location.href='index.html'">一般ページへ</button>
+    <div class="menu-icon" onclick="toggleMenu()">☰</div>
+    <div id="sideMenu" class="side-menu">
+      <a href="index.html">一般ページへ</a>
+      <a href="admin.html">管理者ページへ</a>
+      <a href="#" onclick="logout()">ログアウト</a>
     </div>
+
+    <h2>管理者ページ</h2>
 
     <input type="number" id="numberInput" placeholder="番号（3桁）" min="100" max="999">
     <input type="text" id="nameInput" placeholder="名前">
@@ -222,7 +261,12 @@
       </table>
     </div>
   </div>
-  
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("sideMenu");
+      menu.classList.toggle("open");
+    }
+  </script>
   <script>
     function logout() {
       localStorage.removeItem("id_token");
