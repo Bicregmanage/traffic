@@ -436,7 +436,8 @@
 
         console.log("ログイン中:", payload.email || payload.username);
 
-        const userName = payload["email"];
+        const userEmail = payload["email"];
+        const userName = userEmail ? userEmail.split("@")[0] : "";
         const userDisplayEl = document.getElementById("userDisplay");
         if (userDisplayEl && userName) {
             userDisplayEl.textContent = `${userName} さんがログイン中`;
