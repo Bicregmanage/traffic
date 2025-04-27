@@ -276,17 +276,14 @@
       <a href="index.html">番号照会ページ</a>
       <a href="admin.html">管理者ページ</a>
       <a href="#" class="userEmail" id="userDisplay" style="cursor: default; font-weight: bold; color: #333;">ログイン中</a>
-      <a href="#" class="logout-link" onclick="logout()">
-        ログアウト
-        <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 20px; margin-left: 4px;">
-          logout
-        </span>
-      </a>
+      <a href="#" class="logout-link" onclick="logout()">ログアウト</a>
     </div>
     <h2>登録番号照会</h2>
 
     <input type="text" id="searchInput" placeholder="検索（番号・名前・入学年度）" oninput="searchEntries()">
-
+    <div style="margin-top: 10px; font-size: 14px; color: #555;">
+      表示件数: <span id="entryCount">0</span> 件
+    </div>    
     <div class="sort-row" style="margin-top: 10px;">
       <select id="sortSelect" onchange="sortTable()">
         <option value="number">番号でソート</option>
@@ -371,6 +368,11 @@
         `;
         entryList.appendChild(tr);
       });
+
+      const entryCountEl = document.getElementById("entryCount");
+      if (entryCountEl) {
+        entryCountEl.textContent = data.length;
+      }
     }
 
     function formatToLocalTime(utc) {
