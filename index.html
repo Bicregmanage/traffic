@@ -274,14 +274,17 @@
       gap: 12px;
       margin-top: 10px;
       margin-bottom: 10px;
+      flex-wrap: wrap;
     }
 
     .search-box {
       flex: 1;
+      min-width: 200px; 
       max-width: 400px;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      box-sizing: border-box;
     }
 
     .entry-count {
@@ -289,6 +292,24 @@
       font-size: 14px;
       color: #555;
     }
+
+    @media screen and (max-width: 600px) {
+      .search-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .entry-count {
+        align-self: flex-end;
+        margin-top: 4px;
+      }
+    }
+
 
   </style>
 </head>
