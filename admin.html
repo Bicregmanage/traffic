@@ -331,6 +331,26 @@
       }
     }
 
+    .popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 1000;
+    }
+
+    .popup.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
   </style>
 </head>
 <body>
@@ -352,6 +372,9 @@
 
     <div class="center-buttons">
       <button onclick="addEntry()">追加</button>
+    </div>
+    <div id="popup" class="popup">
+      <span id="popupMessage"></span>
     </div>
     <div class="search-row">
       <input type="text" id="searchInput" placeholder="検索（番号・名前・入学年度）" oninput="searchEntries()">
@@ -471,6 +494,17 @@
       return date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
     }
 
+    function showPopup(message) {
+      const popup = document.getElementById("popup");
+      const popupMessage = document.getElementById("popupMessage");
+      popupMessage.textContent = message;
+      popup.classList.add("show");
+
+      setTimeout(() => {
+        popup.classList.remove("show");
+      }, 3000);
+    }
+
     async function addEntry() {
       const number = document.getElementById("numberInput").value;
       const name = document.getElementById("nameInput").value;
@@ -497,13 +531,13 @@
         });
 
         if (res.ok) {
-          alert("登録しました");
+          showPopup("登録しました");
           document.getElementById("numberInput").value = "";
           document.getElementById("nameInput").value = "";
           document.getElementById("memoInput").value = "";
           loadEntries();
         } else {
-          alert("登録に失敗しました");
+          showPopup("登録に失敗しました");
         }
 
       } catch (e) {
